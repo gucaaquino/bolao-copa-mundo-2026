@@ -1,0 +1,38 @@
+name: Bolão da Família
+
+on:
+  schedule:
+    # Roda todo dia às 22h horário de Brasília (01:00 UTC)
+    - cron: '0 1 * * *'
+  workflow_dispatch: # permite rodar manualmente pelo GitHub
+
+jobs:
+  atualizar-bolao:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Buscar resultados e salvar na planilha
+        env:
+          FOOTBALL_API_TOKEN: ${{ secrets.FOOTBALL_API_TOKEN }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          SHEET_ID:           ${{ secrets.SHEET_ID }}
+        run: python scripts/buscar_resultados.py
+
+      - name: Enviar notificação no Telegram
+        env:
+          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          SHEET_ID:           ${{ secrets.SHEET_ID }}
+        run: python scripts/enviar_telegram.py

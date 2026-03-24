@@ -3,7 +3,7 @@ name: Bolão da Família
 on:
   schedule:
     # Roda todo dia às 22h horário de Brasília (01:00 UTC)
-    - cron: '0 0 * * *'
+    - cron: '0 2 * * *'
   workflow_dispatch: # permite rodar manualmente pelo GitHub
 
 jobs:

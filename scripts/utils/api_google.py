@@ -7,7 +7,7 @@ import pytz
 import random
 import os
 
-BR_TZ       = pytz.timezone('America/Sao_Paulo')
+BR_TZ = pytz.timezone('America/Sao_Paulo')
 
 def autenticar_sheets():
     if os.getenv("GOOGLE_CREDENTIALS"):

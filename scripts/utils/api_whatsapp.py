@@ -5,9 +5,7 @@ from datetime import datetime
 import os
 import requests
 
-BR_TZ                       = pytz.timezone('America/Sao_Paulo')
-EVOLUTION_URL               = os.environ['EVOLUTION_URL']
-EVOLUTION_APIKEY            = os.environ['EVOLUTION_APIKEY']
+BR_TZ = pytz.timezone('America/Sao_Paulo')
 
 saudacoes = [
     "Fala meu jogador",
@@ -37,6 +35,9 @@ complementos = [
 
 
 def enviar_whatsapp(mensagem, EVOLUTION_PHONE):
+    EVOLUTION_URL    = os.environ['EVOLUTION_URL']
+    EVOLUTION_APIKEY = os.environ['EVOLUTION_APIKEY']
+
     url     = f'{EVOLUTION_URL}/message/sendText/vm-bolao-copa'
     headers = {
         'apikey': EVOLUTION_APIKEY,

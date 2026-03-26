@@ -3,7 +3,7 @@ from scripts.utils import api_google as ag
 from scripts.utils import api_footballorg as af
 
 SHEET_ID  = os.environ['SHEET_ID']
-API_TOKEN =  os.environ['FOOTBALL_API_TOKEN']
+API_TOKEN = os.environ['FOOTBALL_API_TOKEN']
 gc        = ag.autenticar_sheets()
 
 def atualizar():

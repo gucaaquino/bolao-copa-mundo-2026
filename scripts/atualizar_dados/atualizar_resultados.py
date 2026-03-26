@@ -2,12 +2,13 @@ import os
 from scripts.utils import api_google as ag
 from scripts.utils import api_footballorg as af
 
-SHEET_ID = os.environ['SHEET_ID']
-gc       = ag.autenticar_sheets()
+SHEET_ID  = os.environ['SHEET_ID']
+API_TOKEN =  os.environ['FOOTBALL_API_TOKEN']
+gc        = ag.autenticar_sheets()
 
 def atualizar():
     # busca resultados
-    jogos_api = af.buscar_jogos_api([8])
+    jogos_api = af.buscar_jogos_api([8], API_TOKEN)
 
     ag.montar_planilha_resultados(gc, jogos_api, SHEET_ID)
 

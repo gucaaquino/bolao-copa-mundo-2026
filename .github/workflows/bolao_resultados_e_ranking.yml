@@ -1,0 +1,53 @@
+name: Bolão - Mensagem Resultados e Ranking
+
+on:
+  schedule:
+    - cron: '0 9-14 * * *'
+  workflow_dispatch: 
+
+jobs:
+  mandar-resultados-ranking:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Atualizar Resultados (API)
+        env:
+          FOOTBALL_API_TOKEN: ${{ secrets.FOOTBALL_API_TOKEN }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          SHEET_ID:           ${{ secrets.SHEET_ID }}
+        run: python -m scripts.atualizar_dados.atualizar_resultados
+
+      - name: Atualizar Ranking
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          SHEET_ID:           ${{ secrets.SHEET_ID }}
+        run: python -m scripts.send_messages.send_resultados
+
+      - name: Mandar Mensagem Resultados
+        env:
+          EVOLUTION_URL:              ${{ secrets.EVOLUTION_URL }}
+          EVOLUTION_APIKEY:           ${{ secrets.EVOLUTION_APIKEY }}
+          EVOLUTION_PHONE_RESULTADOS: ${{ secrets.EVOLUTION_PHONE_RESULTADOS }}
+          GOOGLE_CREDENTIALS:         ${{ secrets.GOOGLE_CREDENTIALS }}
+          SHEET_ID:                   ${{ secrets.SHEET_ID }}
+        run: python -m scripts.send_messages.send_resultados
+
+      - name: Mandar Mensagem Ranking
+        env:
+          EVOLUTION_URL:           ${{ secrets.EVOLUTION_URL }}
+          EVOLUTION_APIKEY:        ${{ secrets.EVOLUTION_APIKEY }}
+          EVOLUTION_PHONE_RANKING: ${{ secrets.EVOLUTION_PHONE_RANKING }}
+          GOOGLE_CREDENTIALS:      ${{ secrets.GOOGLE_CREDENTIALS }}
+          SHEET_ID:                ${{ secrets.SHEET_ID }}
+        run: python -m scripts.send_messages.send_ranking

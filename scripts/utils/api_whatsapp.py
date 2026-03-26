@@ -10,6 +10,7 @@ EVOLUTION_URL               = os.environ['EVOLUTION_URL']
 EVOLUTION_APIKEY            = os.environ['EVOLUTION_APIKEY']
 EVOLUTION_PHONE_ANUNCIOS    = os.environ['EVOLUTION_PHONE_ANUNCIOS']
 EVOLUTION_PHONE_RESULTADOS  = os.environ['EVOLUTION_PHONE_RESULTADOS']
+EVOLUTION_PHONE_RANKING     = os.environ['EVOLUTION_PHONE_RANKING']
 
 saudacoes = [
     "Fala meu jogador",
@@ -37,6 +38,23 @@ complementos = [
     " 🚀",
 ]
 
+
+def enviar_whatsapp(mensagem, EVOLUTION_PHONE):
+    url     = f'{EVOLUTION_URL}/message/sendText/vm-bolao-copa'
+    headers = {
+        'apikey': EVOLUTION_APIKEY,
+        'Content-Type': 'application/json'
+    }
+    payload = {
+        'number': EVOLUTION_PHONE,
+        'text': mensagem
+    }
+    r = requests.post(url, json=payload, headers=headers)
+    if r.status_code == 201:
+        print('✅ Mensagem enviada no WhatsApp!')
+    else:
+        raise Exception(f'Erro ao enviar: {r.text}')
+    
 def montar_mensagem_bom_dia(df_jogos: pd.DataFrame, df_times: pd.DataFrame):
     current_date = datetime.now(BR_TZ).strftime('%d/%m/%Y')
 
@@ -68,14 +86,17 @@ def montar_mensagem_bom_dia(df_jogos: pd.DataFrame, df_times: pd.DataFrame):
 
     return mensagem
 
-def montar_mensagem_resultados(df_resultados, df_times):
+def montar_mensagem_resultados(df_resultados, df_times): 
 
-    current_date = datetime.now(BR_TZ).strftime('%d/%m/%Y')
+    current_dt = datetime.now(BR_TZ)
+    current_date = current_dt.strftime('%d/%m/%Y')
+    hora_execucao = current_dt.strftime('%H:%M')
 
     resultados_hoje = df_resultados[df_resultados['data'] == current_date].copy()
 
     if resultados_hoje.empty:
-        return 'Hoje não há jogos acontecendo.'
+        print('Nenhum jogo acontecendo hoje!')
+        return None
 
     resultados_hoje['gols_casa'] = pd.to_numeric(resultados_hoje['gols_casa'], errors='coerce')
     resultados_hoje['gols_fora'] = pd.to_numeric(resultados_hoje['gols_fora'], errors='coerce')
@@ -87,7 +108,7 @@ def montar_mensagem_resultados(df_resultados, df_times):
 
     resultados_hoje = resultados_hoje.sort_values(by=['grupo', 'hora'])
 
-    mensagem = '📊 *Resultados dos jogos de hoje:*'
+    mensagem = f'📊 *{random.choice(saudacoes)}, {random.choice(introducoes_resultados)}*'
 
     for grupo, df_grupo in resultados_hoje.groupby('grupo'):
         mensagem += f'\n\n*Grupo {grupo}:*'
@@ -102,28 +123,69 @@ def montar_mensagem_resultados(df_resultados, df_times):
             casa = j['time_casa'] if pd.notna(j['time_casa']) else j['sigla_casa']
             fora = j['time_fora'] if pd.notna(j['time_fora']) else j['sigla_fora']
 
-            mensagem += f"\n - {j['hora']} | {casa} {placar} {fora}"
+            status = j.get('status')
+            if status == 'encerrado':
+                status_icon = "✅ "
+            elif status == 'em_andamento':
+                status_icon = "🔴 "
+            else:
+                status_icon = ""
+
+            mensagem += f"\n - {status_icon}{j['hora']} | {casa} {placar} {fora}"
+
+    mensagem += "\n\nLegenda:"
+    mensagem += "\n✅ Jogo computado"
+    mensagem += "\n🔴 Jogo sendo computado"
+    mensagem += f"\n\n🕒 Atualizado às {hora_execucao}"
 
     return mensagem
+    
+def montar_mensagem_ranking(df_parcial, df_usuarios):
 
-def enviar_whatsapp(mensagem, EVOLUTION_PHONE):
-    url     = f'{EVOLUTION_URL}/message/sendText/vm-bolao-copa'
-    headers = {
-        'apikey': EVOLUTION_APIKEY,
-        'Content-Type': 'application/json'
-    }
-    payload = {
-        'number': EVOLUTION_PHONE,
-        'text': mensagem
-    }
-    r = requests.post(url, json=payload, headers=headers)
-    if r.status_code == 201:
-        print('✅ Mensagem enviada no WhatsApp!')
-    else:
-        raise Exception(f'Erro ao enviar: {r.text}')
+    current_dt = datetime.now(BR_TZ)
+    hora_execucao = current_dt.strftime('%H:%M')
+
+    if df_parcial.empty:
+        return None
+
+    df = df_parcial.copy()
+
+    df = df.merge(df_usuarios, on='email', how='left')
+    df['nome'] = df['nome'].fillna(df['email'])
+
+    df = df.sort_values('total', ascending=False).reset_index(drop=True)
+
+    df['posicao'] = range(1, len(df) + 1)
+
+    menor_pontuacao = df['total'].min()
+
+    mensagem = '🏆 *Ranking Geral do Bolão:*\n'
+
+    for _, row in df.iterrows():
+        medalha = ''
+        if row['posicao'] == 1:
+            medalha = '🥇 '
+        elif row['posicao'] == 2:
+            medalha = '🥈 '
+        elif row['posicao'] == 3:
+            medalha = '🥉 '
+
+        lanterna = ' 🔦' if row['total'] == menor_pontuacao else ''
+
+        mensagem += (
+            f"\n{medalha}{row['posicao']}º - {row['nome']} "
+            f"({int(row['total'])} pts){lanterna}"
+        )
+    
+    mensagem += f"\n\n🕒 Atualizado às {hora_execucao}"
+
+    return mensagem
     
 def enviar_mensagem_anuncio(mensagem):
     enviar_whatsapp(mensagem, EVOLUTION_PHONE_ANUNCIOS)
     
 def enviar_mensagem_resultado(mensagem):
-    enviar_whatsapp(mensagem, EVOLUTION_PHONE_RESULTADOS)
+    enviar_whatsapp(mensagem, EVOLUTION_PHONE_RESULTADOS)    
+
+def enviar_mensagem_ranking(mensagem):
+    enviar_whatsapp(mensagem, EVOLUTION_PHONE_RANKING)

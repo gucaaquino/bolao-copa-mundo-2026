@@ -21,8 +21,9 @@ Thumbs.db
 
 # Credenciais / segredos
 
-credentials.json
+creds/
 .env
+*.json
 
 # VS Code
 

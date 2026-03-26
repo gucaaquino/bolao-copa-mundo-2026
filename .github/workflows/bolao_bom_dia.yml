@@ -1,0 +1,48 @@
+name: Bolão da Família - Mensagem Bom Dia
+
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch: 
+
+jobs:
+  atualizar-bolao:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Mandar mensagem de bom dia
+        env:
+          EVOLUTION_URL: ${{ secrets.EVOLUTION_URL }}
+          EVOLUTION_APIKEY: ${{ secrets.EVOLUTION_APIKEY }}
+          EVOLUTION_PHONE_ANUNCIOS: ${{ secrets.EVOLUTION_PHONE_ANUNCIOS }}
+          EVOLUTION_PHONE_RESULTADOS: ${{ secrets.EVOLUTION_PHONE_RESULTADOS }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          SHEET_ID:           ${{ secrets.SHEET_ID }}
+        run: python send_bom_dia.py
+
+      # - name: Buscar resultados e salvar na planilha
+      #   env:
+      #     FOOTBALL_API_TOKEN: ${{ secrets.FOOTBALL_API_TOKEN }}
+      #     GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      #     SHEET_ID:           ${{ secrets.SHEET_ID }}
+      #   run: python scripts/buscar_resultados.py
+
+
+      # - name: Enviar notificação no Telegram
+      #   env:
+      #     TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+      #     TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      #     GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      #     SHEET_ID:           ${{ secrets.SHEET_ID }}
+      #   run: python scripts/enviar_telegram.py

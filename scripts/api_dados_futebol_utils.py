@@ -1,0 +1,33 @@
+import os
+import requests
+
+API_TOKEN   =  os.environ['FOOTBALL_API_TOKEN']
+COMPETITION = 'BSA'
+BASE_URL    = 'https://api.football-data.org/v4'
+
+def api_request(url):
+    r = requests.get(f'{BASE_URL}/competitions/{COMPETITION}/{url}',
+        headers={
+            'X-Auth-Token': API_TOKEN
+        },
+    )
+    r.raise_for_status()
+
+    return r
+
+def buscar_jogos_api(rodadas_filter):
+    r = api_request('matches')
+    
+    jogos = [p for p in r.json()['matches'] if p['matchday'] in rodadas_filter]
+    print(f"⚽ {len(jogos)} jogos encontrados")
+
+    return jogos
+
+def buscar_times_api():
+    r = api_request('teams')
+
+    times = [[aux['name'], aux['tla']] for aux in r.json()['teams']]
+    
+    print(f"⚽ {len(times)} times encontrados")
+
+    return times

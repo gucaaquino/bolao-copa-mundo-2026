@@ -2,11 +2,11 @@ name: Bolão da Família - Mensagem Bom Dia
 
 on:
   schedule:
-    - cron: '0 10 * * *'
+    - cron: '0 9 * * *'
   workflow_dispatch: 
 
 jobs:
-  atualizar-bolao:
+  mandar-bom-dia:
     runs-on: ubuntu-latest
 
     steps:

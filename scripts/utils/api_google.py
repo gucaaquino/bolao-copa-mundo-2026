@@ -8,18 +8,17 @@ import random
 import os
 
 BR_TZ       = pytz.timezone('America/Sao_Paulo')
-SCOPES      = ["https://www.googleapis.com/auth/spreadsheets"]
 
 def autenticar_sheets():
     if os.getenv("GOOGLE_CREDENTIALS"):
-        creds_dict = json.loads(
-            os.environ["GOOGLE_CREDENTIALS"].replace("\\n", "\n")
-        )
-        creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+        CREDENTIALS = json.loads(os.environ['GOOGLE_CREDENTIALS'])
+        SCOPES      = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+
+        creds = Credentials.from_service_account_info(CREDENTIALS, scopes=SCOPES)
     else:
         creds = Credentials.from_service_account_file(
             "creds/google-key.json",
-            scopes=SCOPES
+            scopes=["https://www.googleapis.com/auth/spreadsheets"]
         )
 
     return gspread.authorize(creds)

@@ -26,23 +26,6 @@ jobs:
           EVOLUTION_URL: ${{ secrets.EVOLUTION_URL }}
           EVOLUTION_APIKEY: ${{ secrets.EVOLUTION_APIKEY }}
           EVOLUTION_PHONE_ANUNCIOS: ${{ secrets.EVOLUTION_PHONE_ANUNCIOS }}
-          EVOLUTION_PHONE_RESULTADOS: ${{ secrets.EVOLUTION_PHONE_RESULTADOS }}
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           SHEET_ID:           ${{ secrets.SHEET_ID }}
         run: python -m scripts.send_messages.send_bom_dia
-
-      # - name: Buscar resultados e salvar na planilha
-      #   env:
-      #     FOOTBALL_API_TOKEN: ${{ secrets.FOOTBALL_API_TOKEN }}
-      #     GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-      #     SHEET_ID:           ${{ secrets.SHEET_ID }}
-      #   run: python scripts/buscar_resultados.py
-
-
-      # - name: Enviar notificação no Telegram
-      #   env:
-      #     TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
-      #     TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-      #     GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-      #     SHEET_ID:           ${{ secrets.SHEET_ID }}
-      #   run: python scripts/enviar_telegram.py

@@ -8,9 +8,6 @@ import requests
 BR_TZ                       = pytz.timezone('America/Sao_Paulo')
 EVOLUTION_URL               = os.environ['EVOLUTION_URL']
 EVOLUTION_APIKEY            = os.environ['EVOLUTION_APIKEY']
-EVOLUTION_PHONE_ANUNCIOS    = os.environ['EVOLUTION_PHONE_ANUNCIOS']
-EVOLUTION_PHONE_RESULTADOS  = os.environ['EVOLUTION_PHONE_RESULTADOS']
-EVOLUTION_PHONE_RANKING     = os.environ['EVOLUTION_PHONE_RANKING']
 
 saudacoes = [
     "Fala meu jogador",
@@ -180,12 +177,3 @@ def montar_mensagem_ranking(df_parcial, df_usuarios):
     mensagem += f"\n\n🕒 Atualizado às {hora_execucao}"
 
     return mensagem
-    
-def enviar_mensagem_anuncio(mensagem):
-    enviar_whatsapp(mensagem, EVOLUTION_PHONE_ANUNCIOS)
-    
-def enviar_mensagem_resultado(mensagem):
-    enviar_whatsapp(mensagem, EVOLUTION_PHONE_RESULTADOS)    
-
-def enviar_mensagem_ranking(mensagem):
-    enviar_whatsapp(mensagem, EVOLUTION_PHONE_RANKING)

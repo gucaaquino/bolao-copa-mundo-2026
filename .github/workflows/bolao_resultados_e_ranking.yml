@@ -32,7 +32,7 @@ jobs:
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           SHEET_ID:           ${{ secrets.SHEET_ID }}
-        run: python -m scripts.send_messages.send_resultados
+        run: python -m scripts.atualizar_dados.atualizar_ranking
 
       - name: Mandar Mensagem Resultados
         env:

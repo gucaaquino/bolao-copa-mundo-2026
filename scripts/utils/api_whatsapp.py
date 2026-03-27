@@ -62,10 +62,10 @@ def montar_mensagem_bom_dia(df_jogos: pd.DataFrame, df_times: pd.DataFrame):
 
     if not jogos_hoje.empty:
 
-        mapa_times = dict(zip(df_times['sigla'], df_times['nome']))
+        mapa_times = dict(zip(df_times['id'], df_times['nome']))
 
-        jogos_hoje['time_casa'] = jogos_hoje['sigla_casa'].map(mapa_times)
-        jogos_hoje['time_fora'] = jogos_hoje['sigla_fora'].map(mapa_times)
+        jogos_hoje['time_casa'] = jogos_hoje['id_time_casa'].map(mapa_times)
+        jogos_hoje['time_fora'] = jogos_hoje['id_time_fora'].map(mapa_times)
 
         jogos_hoje = jogos_hoje.sort_values(by=['grupo', 'hora'])
 
@@ -75,69 +75,75 @@ def montar_mensagem_bom_dia(df_jogos: pd.DataFrame, df_times: pd.DataFrame):
             mensagem += f'\n*Grupo {grupo}:*'
 
             for _, j in df_grupo.iterrows():
-                casa = j['time_casa'] if pd.notna(j['time_casa']) else j['sigla_casa']
-                fora = j['time_fora'] if pd.notna(j['time_fora']) else j['sigla_fora']
+                casa = j['time_casa'] if pd.notna(j['time_casa']) else j['id_time_casa']
+                fora = j['time_fora'] if pd.notna(j['time_fora']) else j['id_time_fora']
 
-                mensagem += f"\n - {j['hora']} | {casa} x {fora}"
+                mensagem += f'\n - {j["hora"]} | {casa} x {fora}'
     else:
         mensagem += '\nHoje infelizmente não temos nenhum jogo programado!'
 
     return mensagem
 
-def montar_mensagem_resultados(df_resultados, df_times): 
+def montar_mensagem_resultados(df_resultados, df_jogos, df_times):
 
     current_dt = datetime.now(BR_TZ)
     current_date = current_dt.strftime('%d/%m/%Y')
     hora_execucao = current_dt.strftime('%H:%M')
 
-    resultados_hoje = df_resultados[df_resultados['data'] == current_date].copy()
+    jogos_hoje = df_jogos[df_jogos['data'] == current_date].copy()
 
-    if resultados_hoje.empty:
-        print('Nenhum jogo acontecendo hoje!')
+    if jogos_hoje.empty:
         return None
 
-    resultados_hoje['gols_casa'] = pd.to_numeric(resultados_hoje['gols_casa'], errors='coerce')
-    resultados_hoje['gols_fora'] = pd.to_numeric(resultados_hoje['gols_fora'], errors='coerce')
+    mapa_times_id_to_name = dict(zip(df_times['id'], df_times['nome']))
 
-    mapa_times = dict(zip(df_times['sigla'], df_times['nome']))
+    jogos_hoje['time_casa'] = jogos_hoje['id_time_casa'].map(mapa_times_id_to_name)
+    jogos_hoje['time_fora'] = jogos_hoje['id_time_fora'].map(mapa_times_id_to_name)
+    jogos_hoje = jogos_hoje.rename(columns={'id': 'id_jogo'}).copy()
 
-    resultados_hoje['time_casa'] = resultados_hoje['sigla_casa'].map(mapa_times)
-    resultados_hoje['time_fora'] = resultados_hoje['sigla_fora'].map(mapa_times)
+    df_resultados['gols_casa'] = pd.to_numeric(df_resultados['gols_casa'], errors='coerce')
+    df_resultados['gols_fora'] = pd.to_numeric(df_resultados['gols_fora'], errors='coerce')
+
+    resultados_hoje = jogos_hoje.merge(
+        df_resultados[['id_jogo', 'gols_casa', 'gols_fora', 'status']],
+        on='id_jogo',
+        how='left',
+        suffixes=('_jogos', '_resultados')
+    )
 
     resultados_hoje = resultados_hoje.sort_values(by=['grupo', 'hora'])
 
-    mensagem = f'📊 *{random.choice(saudacoes)}, {random.choice(introducoes_resultados)}*'
+    mensagem = '📊 *Resultados dos jogos de hoje:*'
 
     for grupo, df_grupo in resultados_hoje.groupby('grupo'):
         mensagem += f'\n\n*Grupo {grupo}:*'
 
         for _, j in df_grupo.iterrows():
+            placar = 'x'
+            status = ''
+            if j['status'] == 'encerrado' or j['status'] == 'em_andamento':
+                if pd.notna(j['gols_casa']) and pd.notna(j['gols_fora']):
+                    if j['status'] == 'encerrado':
+                        status = ' ✅'
+                    else:
+                        status = ' 🔴'
 
-            if pd.notna(j['gols_casa']) and pd.notna(j['gols_fora']):
-                placar = f"{int(j['gols_casa'])} x {int(j['gols_fora'])}"
-            else:
-                placar = "x"
+                    placar = f'{int(j["gols_casa"])} x {int(j["gols_fora"])}'
+            elif j['status'] == 'futuro':
+                placar = 'x' 
 
-            casa = j['time_casa'] if pd.notna(j['time_casa']) else j['sigla_casa']
-            fora = j['time_fora'] if pd.notna(j['time_fora']) else j['sigla_fora']
+            casa = j['time_casa'] if pd.notna(j['time_casa']) else 'Time Casa Desconhecido'
+            fora = j['time_fora'] if pd.notna(j['time_fora']) else 'Time Fora Desconhecido'
 
-            status = j.get('status')
-            if status == 'encerrado':
-                status_icon = "✅ "
-            elif status == 'em_andamento':
-                status_icon = "🔴 "
-            else:
-                status_icon = ""
+            mensagem += f'\n - {j["hora"]} | {casa} {placar} {fora}{status}'
 
-            mensagem += f"\n - {status_icon}{j['hora']} | {casa} {placar} {fora}"
-
-    mensagem += "\n\nLegenda:"
-    mensagem += "\n✅ Jogo computado"
-    mensagem += "\n🔴 Jogo sendo computado"
-    mensagem += f"\n\n🕒 Atualizado às {hora_execucao}"
+    mensagem += '\n\nLegenda:'
+    mensagem += '\n✅ Jogo computado'
+    mensagem += '\n🔴 Jogo sendo computado'
+    mensagem += f'\n\n🕒 Atualizado às {hora_execucao}'
 
     return mensagem
-    
+
 def montar_mensagem_ranking(df_parcial, df_usuarios):
 
     current_dt = datetime.now(BR_TZ)
@@ -171,7 +177,7 @@ def montar_mensagem_ranking(df_parcial, df_usuarios):
         lanterna = ' 🔦' if row['total'] == menor_pontuacao else ''
 
         mensagem += (
-            f"\n{medalha}{row['posicao']}º - {row['nome']} "
+            f"\n{medalha}{row['posicao']}º - {row['alias']} "
             f"({int(row['total'])} pts){lanterna}"
         )
     

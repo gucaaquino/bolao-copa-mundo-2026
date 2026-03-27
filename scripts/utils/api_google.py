@@ -49,44 +49,40 @@ def traduzir_status(status):
 
 def montar_planilha_jogos(gc, jogos, SHEET_ID):
     nome_aba  = 'jogos'
-    cabecalho = ['data', 'hora', 'sigla_casa', 'sigla_fora', 'grupo']
+    cabecalho = ['id', 'data', 'hora', 'id_time_casa', 'id_time_fora', 'grupo']
     dados     = [cabecalho]
 
     for p in jogos:
-        data, hora    = formatar_data_hora(p.get('utcDate'))
-        sigla_casa    = p['homeTeam'].get('tla')
-        sigla_fora    = p['awayTeam'].get('tla')
+        id         = p.get('id')
+        data, hora = formatar_data_hora(p.get('utcDate'))
+        id_casa = p['homeTeam'].get('id')
+        id_fora = p['awayTeam'].get('id')
 
         grupo = random.choice(['A', 'B'])
         data = datetime.now(BR_TZ).strftime('%d/%m/%Y')
 
-        dados.append([data, hora, sigla_casa, sigla_fora, grupo])
+        dados.append([id, data, hora, id_casa, id_fora, grupo])
 
     preencher_planilha(gc, nome_aba, dados, SHEET_ID)
 
 def montar_planilha_resultados(gc, jogos, SHEET_ID):
     nome_aba  = 'resultados'
-    cabecalho = ['data', 'hora', 'status', 'sigla_casa', 'sigla_fora', 'gols_casa', 'gols_fora', 'grupo']
+    cabecalho = ['id_jogo', 'status', 'gols_casa', 'gols_fora']
     dados     = [cabecalho]
 
     for p in jogos:
-        data, hora   = formatar_data_hora(p.get('utcDate'))
+        id           = p.get('id')
         status       = random.choice(['futuro', 'encerrado', 'em_andamento'])#traduzir_status(p.get('status'))
-        sigla_casa   = p['homeTeam'].get('tla')
-        sigla_fora   = p['awayTeam'].get('tla')
         gols_casa    = p['score']['fullTime']['home']
         gols_fora    = p['score']['fullTime']['away']
 
-        grupo = random.choice(['A', 'B'])
-        data = datetime.now(BR_TZ).strftime('%d/%m/%Y')
-
-        dados.append([data, hora, status, sigla_casa, sigla_fora, str(gols_casa) if gols_casa is not None else '', str(gols_fora) if gols_fora is not None else '', grupo])
+        dados.append([id, status, str(gols_casa) if gols_casa is not None else '', str(gols_fora) if gols_fora is not None else ''])
       
     preencher_planilha(gc, nome_aba, dados, SHEET_ID)
 
 def montar_planilha_times(gc, times, SHEET_ID):
     nome_aba  = 'times'
-    cabecalho = ['nome', 'sigla']
+    cabecalho = ['id', 'nome', 'sigla']
     dados = [cabecalho]
 
     for t in times:
@@ -94,46 +90,71 @@ def montar_planilha_times(gc, times, SHEET_ID):
 
     preencher_planilha(gc, nome_aba, dados, SHEET_ID)
 
-def montar_planilha_apostas(gc, apostas, SHEET_ID):
+def montar_planilha_apostas(gc, apostas, jogos, times, SHEET_ID):
+    mapa_times = dict(zip(times['id'], times['sigla']))
+
+    jogos_hoje = jogos.copy()
+    jogos_hoje['time_casa'] = jogos_hoje['id_time_casa'].map(mapa_times)
+    jogos_hoje['time_fora'] = jogos_hoje['id_time_fora'].map(mapa_times)
+
+    de_para = {}
+    de_para['Endereço de e-mail'] = 'email'
+    de_para['Nome completo']      = 'nome'
+    de_para['Número de Telefone'] = 'numero'
+
+    for _, j in jogos_hoje.iterrows():
+        if j['id_time_casa'] == 4241:
+            j['time_casa'] = 'CFC'
+        if j['id_time_fora'] == 4241:
+            j['time_fora'] = 'CFC'
+        if j['id_time_casa'] == 1776:
+            j['time_casa'] = 'SAO'
+        if j['id_time_fora'] == 1776:
+            j['time_fora'] = 'SAO'
+        de_para[f'{j["time_casa"]} x {j["time_fora"]} - Gols Casa'] = f'{j["id"]}C'
+        de_para[f'{j["time_casa"]} x {j["time_fora"]} - Gols Fora'] = f'{j["id"]}F'
+
+    apostas = apostas.rename(columns=de_para).drop(columns=['Carimbo de data/hora'])
+
     apostas_unpivot = apostas.melt(
-        id_vars=['email', 'nome'],
+        id_vars=['email', 'numero'],
         var_name='jogo',
         value_name='resultado'
     )
 
-    apostas_unpivot[['jogo_base', 'tipo_gol']] = apostas_unpivot['jogo'].str.split(' - ', expand=True)
+    apostas_unpivot[['id_jogo', 'sigla']] = apostas_unpivot['jogo'].str.extract('(^\d+)([CF]$)')
 
     apostas_pivot = apostas_unpivot.pivot_table(
-        index=['email', 'nome', 'jogo_base'],
-        columns='tipo_gol',
+        index=['email', 'id_jogo'],
+        columns='sigla',
         values='resultado'
     ).reset_index()
 
-    apostas_pivot.columns.name = None 
+    apostas_pivot.columns.name = None
     apostas_pivot = apostas_pivot.rename(columns={
-        'Gols Casa': 'gols_casa',
-        'Gols Fora': 'gols_fora',
-        'jogo_base': 'jogo'
+        'C': 'gols_casa',
+        'F': 'gols_fora'
     })
-
-    apostas_pivot[['sigla_casa', 'sigla_fora']] = apostas_pivot['jogo'].str.split(' x ', expand=True)
-
-    apostas_pivot = apostas_pivot[['email', 'nome', 'sigla_casa', 'sigla_fora', 'gols_fora', 'gols_casa']]
 
     preencher_planilha_df(gc, 'apostas', apostas_pivot, SHEET_ID)
 
 def montar_planilha_usuarios(gc, apostas, SHEET_ID):
-    usuarios = apostas[['email', 'nome']].drop_duplicates()
-    usuarios['alias'] = usuarios['nome'].apply(lambda x: x.split()[0])
+    de_para = {}
+    de_para['Endereço de e-mail'] = 'email'
+    de_para['Nome completo']      = 'nome'
+    de_para['Número de Telefone'] = 'numero'
+    apostas = apostas.rename(columns=de_para)
+
+    usuarios = apostas[['email', 'nome', 'numero']].drop_duplicates()
+    usuarios['alias'] = usuarios['nome'].apply(lambda x: f'{x.split()[0]} {x.split()[-1]}' if len(x.split()) > 1 else x)
 
     preencher_planilha_df(gc, 'usuarios', usuarios, SHEET_ID)
 
 def montar_planilha_pontuacao_usuario(gc, apostas, resultados, pontuacao, SHEET_ID):
     resultados_enc = resultados[resultados['status'] == 'encerrado'].copy()
-
     df = apostas.merge(
         resultados_enc,
-        on=['sigla_casa', 'sigla_fora'],
+        on='id_jogo',
         how='inner',
         suffixes=('_palpite', '_real')
     )
@@ -171,9 +192,7 @@ def montar_planilha_pontuacao_usuario(gc, apostas, resultados, pontuacao, SHEET_
 
     df_final = df[[
         'email',
-        'grupo',
-        'sigla_casa',
-        'sigla_fora',
+        'id_jogo',
         'gols_casa',
         'gols_fora',
         'palpite_casa',
@@ -183,9 +202,13 @@ def montar_planilha_pontuacao_usuario(gc, apostas, resultados, pontuacao, SHEET_
 
     preencher_planilha_df(gc, 'pontuacao_usuario', df_final, SHEET_ID)
 
-def montar_planilha_parcial_usuario(gc, dados, SHEET_ID):
+def montar_planilha_parcial_usuario(gc, pontuacao_usuario, jogos, SHEET_ID):
+
+    mapa_grupos = dict(zip(jogos['id'], jogos['grupo']))
+    pontuacao_usuario['grupo'] = pontuacao_usuario['id_jogo'].map(mapa_grupos)
+
     df_grupo = (
-        dados.groupby(['email', 'grupo'])['pontos']
+        pontuacao_usuario.groupby(['email', 'grupo'])['pontos']
         .sum()
         .reset_index()
     )

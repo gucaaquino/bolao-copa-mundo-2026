@@ -8,18 +8,48 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; padding: 2rem 1rem; }
     .wrap { max-width: 640px; margin: 0 auto; }
+
     h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-    .subtitle { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
+    .subtitle { font-size: 14px; color: #666; margin-bottom: 1.25rem; }
+
+    /* Progresso */
+    .prog-wrap { margin-bottom: 1.5rem; }
+    .prog-topo { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .prog-label { font-size: 13px; color: #666; }
+    .prog-num   { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+    .prog-bar   { height: 6px; background: #e5e5e5; border-radius: 99px; overflow: hidden; }
+    .prog-fill  { height: 100%; background: #185FA5; border-radius: 99px; transition: width 0.3s ease; width: 0%; }
+    .prog-fill.completo { background: #1e8449; }
+
+    /* Campos */
     .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; }
-    .card-header { padding: 10px 16px; background: #f9f9f7; border-bottom: 1px solid #e5e5e5; font-size: 13px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.04em; }
+    .card-header { padding: 10px 16px; background: #f9f9f7; border-bottom: 1px solid #e5e5e5; font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
     .campos { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .campo { display: flex; flex-direction: column; gap: 5px; }
     .campo.full { grid-column: 1 / -1; }
     .campo label { font-size: 13px; color: #555; }
     .campo input { padding: 9px 12px; font-size: 15px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; width: 100%; transition: border-color 0.15s; }
     .campo input:focus { outline: none; border-color: #185FA5; box-shadow: 0 0 0 3px rgba(24,95,165,0.1); }
-    .jogo { display: flex; align-items: center; padding: 14px 16px; gap: 10px; border-bottom: 1px solid #f0f0f0; }
+    .err { font-size: 13px; color: #c0392b; margin-top: 3px; display: none; }
+
+    /* Accordion */
+    .accordion { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; }
+    .acc-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; background: #f9f9f7; cursor: pointer; user-select: none; border-bottom: 1px solid transparent; transition: background 0.15s; }
+    .acc-header:hover { background: #f0f0ee; }
+    .acc-header.open { border-bottom: 1px solid #e5e5e5; }
+    .acc-title { display: flex; align-items: center; gap: 10px; }
+    .acc-title span { font-size: 14px; font-weight: 600; }
+    .acc-badge { font-size: 12px; padding: 2px 9px; border-radius: 99px; background: #e8f0fb; color: #185FA5; font-weight: 500; }
+    .acc-badge.completo { background: #eafaf1; color: #1e8449; }
+    .acc-arrow { font-size: 11px; color: #aaa; transition: transform 0.2s; }
+    .acc-arrow.open { transform: rotate(180deg); }
+    .acc-body { display: none; }
+    .acc-body.open { display: block; }
+
+    /* Jogos */
+    .jogo { display: flex; align-items: center; padding: 14px 16px; gap: 10px; border-bottom: 1px solid #f0f0f0; background: #fff; }
     .jogo:last-child { border-bottom: none; }
+    .jogo.encerrado { opacity: 0.45; pointer-events: none; }
     .time-info { flex: 1; }
     .time-info.right { text-align: right; }
     .time { font-size: 15px; font-weight: 600; }
@@ -27,25 +57,62 @@
     .placar { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .placar input { width: 46px; height: 46px; text-align: center; font-size: 20px; font-weight: 600; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; transition: border-color 0.15s; }
     .placar input:focus { outline: none; border-color: #185FA5; box-shadow: 0 0 0 3px rgba(24,95,165,0.1); }
-    .sep { font-size: 16px; color: #bbb; }
+    .sep { font-size: 16px; color: #ccc; }
+
+    /* Botões */
     .btn { width: 100%; padding: 13px; font-size: 16px; font-weight: 600; background: #185FA5; color: #fff; border: none; border-radius: 10px; cursor: pointer; transition: background 0.15s; }
     .btn:hover:not(:disabled) { background: #0C447C; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .err { font-size: 13px; color: #c0392b; margin-top: 4px; display: none; }
-    .err.show { display: block; }
-    .global-err { font-size: 13px; color: #c0392b; margin-bottom: 10px; display: none; text-align: center; }
-    .global-err.show { display: block; }
-    .success { display: none; text-align: center; padding: 2rem; background: #eafaf1; border: 1px solid #a9dfbf; border-radius: 12px; margin-top: 1rem; }
+    .btn-sec { width: 100%; padding: 12px; font-size: 15px; font-weight: 500; background: transparent; color: #555; border: 1px solid #ddd; border-radius: 10px; cursor: pointer; margin-top: 8px; transition: background 0.15s; }
+    .btn-sec:hover { background: #f5f5f3; }
+
+    .global-err { font-size: 13px; color: #c0392b; margin-bottom: 10px; display: none; text-align: center; padding: 10px; background: #fdf0ef; border-radius: 8px; }
+
+    /* Aviso prazo encerrado */
+    .prazo-aviso { background: #fdf0ef; border: 1px solid #f5c6c6; border-radius: 10px; padding: 14px 16px; margin-bottom: 1rem; font-size: 14px; color: #c0392b; text-align: center; display: none; }
+
+    /* Modal */
+    .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: flex-end; justify-content: center; padding: 1rem; }
+    .modal-bg.show { display: flex; }
+    @media(min-width:500px) { .modal-bg { align-items: center; } }
+    .modal { background: #fff; border-radius: 16px; border: 1px solid #e5e5e5; padding: 1.5rem; width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; }
+    .modal h2 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+    .modal .sub { font-size: 13px; color: #666; margin-bottom: 1.25rem; }
+    .resumo-grupo { margin-bottom: 1rem; }
+    .resumo-grupo-title { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .resumo-jogo { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: #f9f9f7; border-radius: 8px; margin-bottom: 4px; font-size: 14px; }
+    .resumo-placar { font-weight: 700; font-size: 15px; color: #185FA5; }
+
+    /* Sucesso */
+    .success { display: none; }
     .success.show { display: block; }
-    .success h2 { color: #1e8449; font-size: 18px; margin-bottom: 6px; }
-    .success p { color: #27ae60; font-size: 14px; }
-    #loading { display: none; text-align: center; font-size: 14px; color: #666; margin-top: 10px; }
+    .success-card { text-align: center; padding: 2rem 1.5rem; background: #eafaf1; border: 1px solid #a9dfbf; border-radius: 12px; margin-bottom: 1.25rem; }
+    .success-card h2 { color: #1e8449; font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+    .success-card p { color: #27ae60; font-size: 14px; }
+    .resumo-final { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; }
+    .resumo-final-header { padding: 10px 16px; background: #f9f9f7; border-bottom: 1px solid #e5e5e5; font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
+    .resumo-final-body { padding: 16px; }
+    .resumo-info { font-size: 13px; color: #666; margin-bottom: 14px; line-height: 1.8; }
+
+    #loading-jogos { text-align: center; color: #999; font-size: 14px; padding: 2rem 0; }
   </style>
 </head>
 <body>
-<div class="wrap">
+
+<!-- Formulário -->
+<div class="wrap" id="form-view">
   <h1>Bolão Copa do Mundo</h1>
   <p class="subtitle">Preencha seus dados e os palpites para todos os jogos</p>
+
+  <div class="prazo-aviso" id="prazo-aviso"></div>
+
+  <div class="prog-wrap">
+    <div class="prog-topo">
+      <span class="prog-label">Progresso geral</span>
+      <span class="prog-num" id="prog-num">0 de 0 jogos</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  </div>
 
   <div class="card">
     <div class="card-header">Seus dados</div>
@@ -69,16 +136,36 @@
   </div>
 
   <div id="jogos-container">
-    <p style="text-align:center; color:#999; font-size:14px; padding: 2rem 0;">Carregando jogos...</p>
+    <p id="loading-jogos">Carregando jogos...</p>
   </div>
 
   <p class="global-err" id="err-palpites">Preencha todos os placares antes de enviar</p>
-  <button class="btn" id="btn-enviar" onclick="enviar()">Enviar palpites</button>
-  <p id="loading">Enviando...</p>
+  <p class="global-err" id="err-prazo">O prazo para envio encerrou. Não é mais possível enviar palpites.</p>
+  <p class="global-err" id="err-envio">Erro ao enviar. Tente novamente.</p>
 
-  <div class="success" id="success">
+  <button class="btn" id="btn-enviar" onclick="abrirConfirmacao()">Revisar e enviar</button>
+</div>
+
+<!-- Modal de confirmação -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h2>Revisar palpites</h2>
+    <p class="sub" id="modal-sub"></p>
+    <div id="modal-resumo"></div>
+    <button class="btn" onclick="enviar()">Confirmar e enviar</button>
+    <button class="btn-sec" onclick="fecharModal()">Voltar e editar</button>
+  </div>
+</div>
+
+<!-- Página de sucesso -->
+<div class="wrap success" id="success-view">
+  <div class="success-card">
     <h2>Palpites enviados!</h2>
     <p id="success-msg"></p>
+  </div>
+  <div class="resumo-final">
+    <div class="resumo-final-header">Seu resumo</div>
+    <div class="resumo-final-body" id="resumo-final-body"></div>
   </div>
 </div>
 
@@ -86,107 +173,252 @@
   // ⚠️ SUBSTITUA PELA URL DO SEU GOOGLE APPS SCRIPT APÓS PUBLICAR
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDjAstNFYTkIcUG0JMSeHnSo9aw1yWui3n6JrTcLNhq5xZFVeOo0x14-GiI3JhEGKTCg/exec';
 
-  let jogosData = [];
+  let jogosData    = [];
+  let gruposData   = {};
+  let totalJogos   = 0;
+  let prazoLimite  = null;
 
   async function carregarJogos() {
     try {
-      const res = await fetch(APPS_SCRIPT_URL);
-      const jogos = await res.json();
-      jogosData = jogos;
-      renderizarJogos(jogos);
-    } catch (err) {
-      document.getElementById('jogos-container').innerHTML =
-        '<p style="text-align:center;color:#c0392b;padding:2rem">Erro ao carregar jogos. Tente recarregar a página.</p>';
-    }
-  }
+      const res  = await fetch(APPS_SCRIPT_URL);
+      const data = await res.json();
+      jogosData  = data.jogos || [];
+      prazoLimite = data.prazo_limite ? new Date(data.prazo_limite) : null;
 
-  function renderizarJogos(jogos) {
-    const grupos = {};
-    jogos.forEach(j => {
-      const grupo = j.grupo || 'Jogos';
-      if (!grupos[grupo]) grupos[grupo] = [];
-      grupos[grupo].push(j);
-    });
-
-    let html = '';
-    for (const [grupo, lista] of Object.entries(grupos)) {
-      html += `<div class="card"><div class="card-header">${grupo}</div>`;
-      lista.forEach(j => {
-        html += `
-          <div class="jogo" data-id="${j.id}">
-            <div class="time-info">
-              <div class="time">${j.time_casa}</div>
-              <div class="data">${j.data} • ${j.hora}</div>
-            </div>
-            <div class="placar">
-              <input type="number" min="0" max="99" placeholder="0" class="g1" />
-              <span class="sep">×</span>
-              <input type="number" min="0" max="99" placeholder="0" class="g2" />
-            </div>
-            <div class="time-info right">
-              <div class="time">${j.time_fora}</div>
-              <div class="data">&nbsp;</div>
-            </div>
-          </div>`;
+      // Agrupa por grupo
+      gruposData = {};
+      jogosData.forEach(j => {
+        const g = j.grupo || 'Jogos';
+        if (!gruposData[g]) gruposData[g] = [];
+        gruposData[g].push(j);
       });
-      html += '</div>';
+
+      totalJogos = jogosData.length;
+      verificarPrazo();
+      renderGrupos();
+      atualizarProgresso();
+    } catch (err) {
+      document.getElementById('loading-jogos').innerHTML =
+        '<span style="color:#c0392b">Erro ao carregar jogos. Recarregue a página.</span>';
     }
-    document.getElementById('jogos-container').innerHTML = html;
   }
 
-  function validarEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+  function verificarPrazo() {
+    if (!prazoLimite) return;
+    const agora = new Date();
+    const aviso = document.getElementById('prazo-aviso');
+    if (agora >= prazoLimite) {
+      aviso.style.display = 'block';
+      aviso.textContent   = '⏰ O prazo para envio de palpites encerrou.';
+      document.getElementById('btn-enviar').disabled = true;
+    } else {
+      const diff  = prazoLimite - agora;
+      const horas = Math.floor(diff / 3600000);
+      const min   = Math.floor((diff % 3600000) / 60000);
+      if (horas < 24) {
+        aviso.style.display = 'block';
+        aviso.style.background = '#fffbea';
+        aviso.style.borderColor = '#f5e6a3';
+        aviso.style.color = '#7d5a00';
+        aviso.textContent = `⏳ Prazo encerra em ${horas}h ${min}min`;
+      }
+    }
+  }
 
-  async function enviar() {
-    const nome = document.getElementById('nome').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const tel = document.getElementById('telefone').value.trim();
+  function renderGrupos() {
+    const container = document.getElementById('jogos-container');
+    const agora     = new Date();
+    let html = '';
+    let gi   = 0;
 
-    document.querySelectorAll('.err').forEach(e => e.classList.remove('show'));
-    document.getElementById('err-palpites').classList.remove('show');
+    for (const [grupo, jogos] of Object.entries(gruposData)) {
+      html += `
+        <div class="accordion" id="acc-${gi}">
+          <div class="acc-header ${gi===0?'open':''}" onclick="toggleAcc(${gi})">
+            <div class="acc-title">
+              <span>${grupo}</span>
+              <span class="acc-badge" id="badge-${gi}">0/${jogos.length} preenchidos</span>
+            </div>
+            <span class="acc-arrow ${gi===0?'open':''}" id="arrow-${gi}">▼</span>
+          </div>
+          <div class="acc-body ${gi===0?'open':''}" id="body-${gi}">`;
 
-    let ok = true;
-    if (!nome)               { document.getElementById('err-nome').classList.add('show');  ok = false; }
-    if (!validarEmail(email)){ document.getElementById('err-email').classList.add('show'); ok = false; }
-    if (!tel)                { document.getElementById('err-tel').classList.add('show');   ok = false; }
+      jogos.forEach(j => {
+        let encerrado = false;
+        if (prazoLimite && agora >= prazoLimite) encerrado = true;
 
-    const jogoEls = document.querySelectorAll('.jogo');
+        html += `
+            <div class="jogo${encerrado?' encerrado':''}" data-id="${j.id}" data-casa="${j.time_casa}" data-fora="${j.time_fora}">
+              <div class="time-info">
+                <div class="time">${j.time_casa}</div>
+                <div class="data">${j.data} • ${j.hora}${encerrado?' • Encerrado':''}</div>
+              </div>
+              <div class="placar">
+                <input type="number" min="0" max="9" placeholder="0" class="g1" oninput="atualizar(${gi},${jogos.length})" ${encerrado?'disabled':''} />
+                <span class="sep">×</span>
+                <input type="number" min="0" max="9" placeholder="0" class="g2" oninput="atualizar(${gi},${jogos.length})" ${encerrado?'disabled':''} />
+              </div>
+              <div class="time-info right">
+                <div class="time">${j.time_fora}</div>
+                <div class="data">&nbsp;</div>
+              </div>
+            </div>`;
+      });
+
+      html += `</div></div>`;
+      gi++;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function toggleAcc(gi) {
+    const header = document.querySelector(`#acc-${gi} .acc-header`);
+    const body   = document.getElementById(`body-${gi}`);
+    const arrow  = document.getElementById(`arrow-${gi}`);
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    header.classList.toggle('open', !isOpen);
+    arrow.classList.toggle('open', !isOpen);
+  }
+
+  function atualizar(gi, total) {
+    const body  = document.getElementById(`body-${gi}`);
+    const jogos = body.querySelectorAll('.jogo:not(.encerrado)');
+    let count   = 0;
+    jogos.forEach(j => {
+      if (j.querySelector('.g1').value !== '' && j.querySelector('.g2').value !== '') count++;
+    });
+    const badge = document.getElementById(`badge-${gi}`);
+    badge.textContent = count === total ? 'Completo' : `${count}/${total} preenchidos`;
+    badge.className   = 'acc-badge' + (count === total ? ' completo' : '');
+
+    if (count === total) {
+      const proxBody = document.getElementById(`body-${gi+1}`);
+      if (proxBody && !proxBody.classList.contains('open')) toggleAcc(gi+1);
+    }
+    atualizarProgresso();
+  }
+
+  function atualizarProgresso() {
+    const todos      = document.querySelectorAll('.jogo:not(.encerrado)');
+    let preenchidos  = 0;
+    todos.forEach(j => {
+      if (j.querySelector('.g1').value !== '' && j.querySelector('.g2').value !== '') preenchidos++;
+    });
+    const pct = totalJogos > 0 ? (preenchidos / totalJogos) * 100 : 0;
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-fill').className   = 'prog-fill' + (preenchidos === totalJogos && totalJogos > 0 ? ' completo' : '');
+    document.getElementById('prog-num').textContent  = `${preenchidos} de ${totalJogos} jogos`;
+  }
+
+  function coletarPalpites() {
+    const jogoEls = document.querySelectorAll('.jogo:not(.encerrado)');
     const palpites = [];
     let incompleto = false;
-
     jogoEls.forEach(j => {
       const g1 = j.querySelector('.g1').value;
       const g2 = j.querySelector('.g2').value;
       if (g1 === '' || g2 === '') { incompleto = true; return; }
-      const times = j.querySelectorAll('.time');
       palpites.push({
         jogo_id:   j.dataset.id,
-        time_casa: times[0].innerText,
+        time_casa: j.dataset.casa,
         gol_casa:  parseInt(g1),
-        time_fora: times[1].innerText,
-        gol_fora:  parseInt(g2)
+        time_fora: j.dataset.fora,
+        gol_fora:  parseInt(g2),
       });
     });
+    return { palpites, incompleto };
+  }
 
-    if (incompleto) { document.getElementById('err-palpites').classList.add('show'); ok = false; }
+  function validarEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+  function abrirConfirmacao() {
+    const nome  = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const tel   = document.getElementById('telefone').value.trim();
+
+    document.querySelectorAll('.err').forEach(e => e.style.display = 'none');
+    document.querySelectorAll('.global-err').forEach(e => e.style.display = 'none');
+
+    // Verifica prazo novamente no momento do envio
+    if (prazoLimite && new Date() >= prazoLimite) {
+      document.getElementById('err-prazo').style.display = 'block';
+      return;
+    }
+
+    let ok = true;
+    if (!nome)                { document.getElementById('err-nome').style.display  = 'block'; ok = false; }
+    if (!validarEmail(email)) { document.getElementById('err-email').style.display = 'block'; ok = false; }
+    if (!tel)                 { document.getElementById('err-tel').style.display   = 'block'; ok = false; }
+
+    const { palpites, incompleto } = coletarPalpites();
+    if (incompleto) { document.getElementById('err-palpites').style.display = 'block'; ok = false; }
     if (!ok) return;
 
+    // Monta resumo no modal
+    document.getElementById('modal-sub').textContent = `${nome}, confira seus palpites antes de confirmar:`;
+    let html = '';
+    for (const [grupo, jogos] of Object.entries(gruposData)) {
+      html += `<div class="resumo-grupo"><div class="resumo-grupo-title">${grupo}</div>`;
+      jogos.forEach(j => {
+        const p = palpites.find(x => x.jogo_id == j.id);
+        if (p) html += `<div class="resumo-jogo"><span>${j.time_casa}</span><span class="resumo-placar">${p.gol_casa} × ${p.gol_fora}</span><span>${j.time_fora}</span></div>`;
+      });
+      html += '</div>';
+    }
+    document.getElementById('modal-resumo').innerHTML = html;
+    document.getElementById('modal').classList.add('show');
+  }
+
+  function fecharModal() {
+    document.getElementById('modal').classList.remove('show');
+  }
+
+  async function enviar() {
+    fecharModal();
+    const nome  = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const tel   = document.getElementById('telefone').value.trim();
+    const { palpites } = coletarPalpites();
+
     const btn = document.getElementById('btn-enviar');
-    const loading = document.getElementById('loading');
-    btn.disabled = true;
-    loading.style.display = 'block';
+    btn.disabled    = true;
+    btn.textContent = 'Enviando...';
 
     try {
-      await fetch(APPS_SCRIPT_URL, {
+      const res  = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         body: JSON.stringify({ nome, email, telefone: tel, palpites }),
       });
-      loading.style.display = 'none';
-      document.getElementById('success-msg').innerText = nome + ', seus palpites foram registrados com sucesso!';
-      document.getElementById('success').classList.add('show');
+      const data = await res.json();
+
+      if (data.status === 'prazo_encerrado') {
+        btn.disabled    = false;
+        btn.textContent = 'Revisar e enviar';
+        document.getElementById('err-prazo').style.display = 'block';
+        return;
+      }
+
+      // Monta página de sucesso
+      let html = `<p class="resumo-info">👤 ${nome}<br>📧 ${email}<br>📱 ${tel}</p>`;
+      for (const [grupo, jogos] of Object.entries(gruposData)) {
+        html += `<p style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin:12px 0 6px;">${grupo}</p>`;
+        jogos.forEach(j => {
+          const p = palpites.find(x => x.jogo_id == j.id);
+          if (p) html += `<div class="resumo-jogo" style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#f9f9f7;border-radius:8px;margin-bottom:4px;font-size:14px;"><span>${j.time_casa}</span><span style="font-weight:700;color:#185FA5;">${p.gol_casa} × ${p.gol_fora}</span><span>${j.time_fora}</span></div>`;
+        });
+      }
+
+      document.getElementById('success-msg').textContent = `${nome}, seus palpites foram registrados com sucesso!`;
+      document.getElementById('resumo-final-body').innerHTML = html;
+      document.getElementById('form-view').style.display = 'none';
+      document.getElementById('success-view').classList.add('show');
+
     } catch (err) {
-      loading.style.display = 'none';
-      btn.disabled = false;
-      alert('Erro ao enviar. Tente novamente.');
+      btn.disabled    = false;
+      btn.textContent = 'Revisar e enviar';
+      document.getElementById('err-envio').style.display = 'block';
     }
   }
 

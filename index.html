@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bolão Copa do Mundo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; padding: 2rem 1rem; }
+    .wrap { max-width: 640px; margin: 0 auto; }
+    h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+    .subtitle { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
+    .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; }
+    .card-header { padding: 10px 16px; background: #f9f9f7; border-bottom: 1px solid #e5e5e5; font-size: 13px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.04em; }
+    .campos { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .campo { display: flex; flex-direction: column; gap: 5px; }
+    .campo.full { grid-column: 1 / -1; }
+    .campo label { font-size: 13px; color: #555; }
+    .campo input { padding: 9px 12px; font-size: 15px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; width: 100%; transition: border-color 0.15s; }
+    .campo input:focus { outline: none; border-color: #185FA5; box-shadow: 0 0 0 3px rgba(24,95,165,0.1); }
+    .jogo { display: flex; align-items: center; padding: 14px 16px; gap: 10px; border-bottom: 1px solid #f0f0f0; }
+    .jogo:last-child { border-bottom: none; }
+    .time-info { flex: 1; }
+    .time-info.right { text-align: right; }
+    .time { font-size: 15px; font-weight: 600; }
+    .data { font-size: 12px; color: #999; margin-top: 2px; }
+    .placar { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .placar input { width: 46px; height: 46px; text-align: center; font-size: 20px; font-weight: 600; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; transition: border-color 0.15s; }
+    .placar input:focus { outline: none; border-color: #185FA5; box-shadow: 0 0 0 3px rgba(24,95,165,0.1); }
+    .sep { font-size: 16px; color: #bbb; }
+    .btn { width: 100%; padding: 13px; font-size: 16px; font-weight: 600; background: #185FA5; color: #fff; border: none; border-radius: 10px; cursor: pointer; transition: background 0.15s; }
+    .btn:hover:not(:disabled) { background: #0C447C; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .err { font-size: 13px; color: #c0392b; margin-top: 4px; display: none; }
+    .err.show { display: block; }
+    .global-err { font-size: 13px; color: #c0392b; margin-bottom: 10px; display: none; text-align: center; }
+    .global-err.show { display: block; }
+    .success { display: none; text-align: center; padding: 2rem; background: #eafaf1; border: 1px solid #a9dfbf; border-radius: 12px; margin-top: 1rem; }
+    .success.show { display: block; }
+    .success h2 { color: #1e8449; font-size: 18px; margin-bottom: 6px; }
+    .success p { color: #27ae60; font-size: 14px; }
+    #loading { display: none; text-align: center; font-size: 14px; color: #666; margin-top: 10px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Bolão Copa do Mundo</h1>
+  <p class="subtitle">Preencha seus dados e os palpites para todos os jogos</p>
+
+  <div class="card">
+    <div class="card-header">Seus dados</div>
+    <div class="campos">
+      <div class="campo full">
+        <label>Nome completo</label>
+        <input type="text" id="nome" placeholder="Ex: João Silva" />
+        <span class="err" id="err-nome">Informe seu nome</span>
+      </div>
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="email" id="email" placeholder="joao@email.com" />
+        <span class="err" id="err-email">Informe um e-mail válido</span>
+      </div>
+      <div class="campo">
+        <label>WhatsApp</label>
+        <input type="tel" id="telefone" placeholder="(19) 99999-9999" />
+        <span class="err" id="err-tel">Informe seu número</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="jogos-container">
+    <p style="text-align:center; color:#999; font-size:14px; padding: 2rem 0;">Carregando jogos...</p>
+  </div>
+
+  <p class="global-err" id="err-palpites">Preencha todos os placares antes de enviar</p>
+  <button class="btn" id="btn-enviar" onclick="enviar()">Enviar palpites</button>
+  <p id="loading">Enviando...</p>
+
+  <div class="success" id="success">
+    <h2>Palpites enviados!</h2>
+    <p id="success-msg"></p>
+  </div>
+</div>
+
+<script>
+  // ⚠️ SUBSTITUA PELA URL DO SEU GOOGLE APPS SCRIPT APÓS PUBLICAR
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDjAstNFYTkIcUG0JMSeHnSo9aw1yWui3n6JrTcLNhq5xZFVeOo0x14-GiI3JhEGKTCg/exec';
+
+  let jogosData = [];
+
+  async function carregarJogos() {
+    try {
+      const res = await fetch(APPS_SCRIPT_URL);
+      const jogos = await res.json();
+      jogosData = jogos;
+      renderizarJogos(jogos);
+    } catch (err) {
+      document.getElementById('jogos-container').innerHTML =
+        '<p style="text-align:center;color:#c0392b;padding:2rem">Erro ao carregar jogos. Tente recarregar a página.</p>';
+    }
+  }
+
+  function renderizarJogos(jogos) {
+    const grupos = {};
+    jogos.forEach(j => {
+      const grupo = j.grupo || 'Jogos';
+      if (!grupos[grupo]) grupos[grupo] = [];
+      grupos[grupo].push(j);
+    });
+
+    let html = '';
+    for (const [grupo, lista] of Object.entries(grupos)) {
+      html += `<div class="card"><div class="card-header">${grupo}</div>`;
+      lista.forEach(j => {
+        html += `
+          <div class="jogo" data-id="${j.id}">
+            <div class="time-info">
+              <div class="time">${j.time_casa}</div>
+              <div class="data">${j.data} • ${j.hora}</div>
+            </div>
+            <div class="placar">
+              <input type="number" min="0" max="99" placeholder="0" class="g1" />
+              <span class="sep">×</span>
+              <input type="number" min="0" max="99" placeholder="0" class="g2" />
+            </div>
+            <div class="time-info right">
+              <div class="time">${j.time_fora}</div>
+              <div class="data">&nbsp;</div>
+            </div>
+          </div>`;
+      });
+      html += '</div>';
+    }
+    document.getElementById('jogos-container').innerHTML = html;
+  }
+
+  function validarEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+  async function enviar() {
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const tel = document.getElementById('telefone').value.trim();
+
+    document.querySelectorAll('.err').forEach(e => e.classList.remove('show'));
+    document.getElementById('err-palpites').classList.remove('show');
+
+    let ok = true;
+    if (!nome)               { document.getElementById('err-nome').classList.add('show');  ok = false; }
+    if (!validarEmail(email)){ document.getElementById('err-email').classList.add('show'); ok = false; }
+    if (!tel)                { document.getElementById('err-tel').classList.add('show');   ok = false; }
+
+    const jogoEls = document.querySelectorAll('.jogo');
+    const palpites = [];
+    let incompleto = false;
+
+    jogoEls.forEach(j => {
+      const g1 = j.querySelector('.g1').value;
+      const g2 = j.querySelector('.g2').value;
+      if (g1 === '' || g2 === '') { incompleto = true; return; }
+      const times = j.querySelectorAll('.time');
+      palpites.push({
+        jogo_id:   j.dataset.id,
+        time_casa: times[0].innerText,
+        gol_casa:  parseInt(g1),
+        time_fora: times[1].innerText,
+        gol_fora:  parseInt(g2)
+      });
+    });
+
+    if (incompleto) { document.getElementById('err-palpites').classList.add('show'); ok = false; }
+    if (!ok) return;
+
+    const btn = document.getElementById('btn-enviar');
+    const loading = document.getElementById('loading');
+    btn.disabled = true;
+    loading.style.display = 'block';
+
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ nome, email, telefone: tel, palpites }),
+      });
+      loading.style.display = 'none';
+      document.getElementById('success-msg').innerText = nome + ', seus palpites foram registrados com sucesso!';
+      document.getElementById('success').classList.add('show');
+    } catch (err) {
+      loading.style.display = 'none';
+      btn.disabled = false;
+      alert('Erro ao enviar. Tente novamente.');
+    }
+  }
+
+  carregarJogos();
+</script>
+</body>
+</html>

@@ -204,6 +204,10 @@ def montar_planilha_pontuacao_usuario(gc, apostas, resultados, pontuacao, SHEET_
 
 def montar_planilha_parcial_usuario(gc, pontuacao_usuario, jogos, SHEET_ID):
 
+    if pontuacao_usuario.empty:
+        preencher_planilha(gc, 'parcial_usuario', [['email', 'total']], SHEET_ID)
+        return None
+
     mapa_grupos = dict(zip(jogos['id'], jogos['grupo']))
     pontuacao_usuario['grupo'] = pontuacao_usuario['id_jogo'].map(mapa_grupos)
 

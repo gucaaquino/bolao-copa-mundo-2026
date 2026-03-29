@@ -8,7 +8,7 @@ gc        = ag.autenticar_sheets()
 
 def atualizar():
     # busca resultados
-    jogos_api = af.buscar_jogos_api([8], API_TOKEN)
+    jogos_api = af.buscar_jogos_api([9], API_TOKEN)
 
     ag.montar_planilha_resultados(gc, jogos_api, SHEET_ID)
 

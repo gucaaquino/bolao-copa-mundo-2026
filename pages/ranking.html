@@ -115,7 +115,7 @@
     <a class="nav-item hidden" id="nav-palpites" onclick="showSection('palpites', event)" href="#">
       <span class="nav-icon">👁️</span> Palpites
     </a>
-    <a class="nav-item" id="nav-formulario" onclick="showSection('formulario', event)" href="#">
+    <a class="nav-item" id="nav-formulario" href="../index.html">
       <span class="nav-icon">✏️</span> Enviar palpites
     </a>
   </nav>
@@ -125,8 +125,15 @@
 <div class="main">
 
   <div class="section active" id="sec-ranking">
-    <p class="page-title">Ranking</p>
-    <p class="page-sub">Classificação geral do bolão</p>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
+      <div>
+        <p class="page-title" style="margin-bottom:0;">Ranking</p>
+        <p class="page-sub" style="margin-bottom:0;">Classificação geral do bolão</p>
+      </div>
+      <a href="../index.html" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
+        ✏️ Enviar palpites
+      </a>
+    </div>
     <div class="update-bar">
       <span class="update-info" id="update-ranking">Carregando...</span>
       <button class="btn-refresh" onclick="carregarRanking(true)">Atualizar</button>
@@ -137,8 +144,15 @@
   </div>
 
   <div class="section" id="sec-palpites">
-    <p class="page-title">Palpites</p>
-    <p class="page-sub">Veja o que cada participante apostou</p>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
+      <div>
+        <p class="page-title" style="margin-bottom:0;">Palpites</p>
+        <p class="page-sub" style="margin-bottom:0;">Veja o que cada participante apostou</p>
+      </div>
+      <a href="../index.html" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
+        ✏️ Enviar palpites
+      </a>
+    </div>
     <div class="update-bar">
       <span class="update-info" id="update-palpites">Carregando...</span>
       <button class="btn-refresh" onclick="carregarPalpites(true)">Atualizar</button>
@@ -154,7 +168,7 @@
     <div class="form-banner">
       <h2>Formulário de palpites</h2>
       <p>Clique no botão abaixo para preencher seus palpites para a rodada atual.</p>
-      <a class="btn-form" href="./index.html">Abrir formulário</a>
+      <a class="btn-form" href="../index.html">Abrir formulário</a>
     </div>
   </div>
 

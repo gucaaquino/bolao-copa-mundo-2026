@@ -8,23 +8,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; }
 
-    .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 220px; background: #fff; border-right: 1px solid #e5e5e5; display: flex; flex-direction: column; z-index: 100; }
-    .sidebar-logo { padding: 20px 20px 16px; border-bottom: 1px solid #e5e5e5; }
-    .sidebar-logo h1 { font-size: 15px; font-weight: 700; color: #1a1a1a; }
-    .sidebar-logo p  { font-size: 12px; color: #999; margin-top: 2px; }
-    .sidebar-nav { padding: 12px 0; flex: 1; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 14px; color: #555; cursor: pointer; text-decoration: none; transition: background 0.15s; border-left: 3px solid transparent; }
-    .nav-item:hover { background: #f5f5f3; color: #1a1a1a; }
-    .nav-item.active { background: #f0f5fb; color: #185FA5; border-left-color: #185FA5; font-weight: 600; }
-    .nav-item.hidden { display: none; }
-    .nav-icon { font-size: 15px; width: 18px; text-align: center; }
-    .sidebar-footer { padding: 16px 20px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #bbb; }
-
-    .hamburger { display: none; position: fixed; top: 14px; left: 14px; z-index: 200; background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 16px; }
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 99; }
-    .overlay.show { display: block; }
-
-    .main { margin-left: 220px; padding: 2rem; max-width: 760px; }
+    .main { padding: 2rem 1rem; max-width: 760px; margin: 0 auto; }
     .section { display: none; }
     .section.active { display: block; }
     .page-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
@@ -80,47 +64,19 @@
     .pal-placar { font-weight: 700; color: #185FA5; white-space: nowrap; }
     .pal-count { font-size: 12px; color: #bbb; margin-left: 6px; }
 
-    /* Formulário */
-    .form-banner { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.5rem; text-align: center; }
-    .form-banner h2 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
-    .form-banner p  { font-size: 14px; color: #666; margin-bottom: 1.25rem; }
-    .btn-form { display: inline-block; padding: 12px 28px; background: #185FA5; color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; transition: background 0.15s; }
-    .btn-form:hover { background: #0C447C; }
+
 
     .state-msg { text-align: center; padding: 3rem 1rem; color: #999; font-size: 14px; }
     .state-msg.erro { color: #c0392b; }
 
     @media(max-width: 700px) {
-      .sidebar { transform: translateX(-100%); transition: transform 0.2s; }
-      .sidebar.open { transform: translateX(0); }
-      .hamburger { display: block; }
-      .main { margin-left: 0; padding: 1rem; padding-top: 56px; }
+      .main { padding: 1rem; }
     }
   </style>
 </head>
 <body>
 
-<button class="hamburger" onclick="toggleSidebar()">☰</button>
-<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-<div class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <h1>Bolão 2026</h1>
-    <p>Campeonato Brasileiro</p>
-  </div>
-  <nav class="sidebar-nav">
-    <a class="nav-item active" id="nav-ranking" onclick="showSection('ranking', event)" href="#">
-      <span class="nav-icon">🏆</span> Ranking
-    </a>
-    <a class="nav-item hidden" id="nav-palpites" onclick="showSection('palpites', event)" href="#">
-      <span class="nav-icon">👁️</span> Palpites
-    </a>
-    <a class="nav-item" id="nav-formulario" href="../index.html">
-      <span class="nav-icon">✏️</span> Enviar palpites
-    </a>
-  </nav>
-  <div class="sidebar-footer" id="sidebar-footer">Carregando...</div>
-</div>
 
 <div class="main">
 
@@ -130,9 +86,14 @@
         <p class="page-title" style="margin-bottom:0;">Ranking</p>
         <p class="page-sub" style="margin-bottom:0;">Classificação geral do bolão</p>
       </div>
-      <a href="../index.html" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
-        ✏️ Enviar palpites
-      </a>
+      <div style="display:flex; gap:8px;">
+        <a id="btn-ver-palpites" href="#" onclick="irParaPalpites(event)" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
+          👁️ Ver palpites
+        </a>
+        <a href="../index.html" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
+          ✏️ Enviar palpites
+        </a>
+      </div>
     </div>
     <div class="update-bar">
       <span class="update-info" id="update-ranking">Carregando...</span>
@@ -149,9 +110,14 @@
         <p class="page-title" style="margin-bottom:0;">Palpites</p>
         <p class="page-sub" style="margin-bottom:0;">Veja o que cada participante apostou</p>
       </div>
-      <a href="../index.html" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
-        ✏️ Enviar palpites
-      </a>
+      <div style="display:flex; gap:8px;">
+        <a href="#" onclick="irParaRanking(event)" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
+          🏆 Ver ranking
+        </a>
+        <a href="../index.html" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
+          ✏️ Enviar palpites
+        </a>
+      </div>
     </div>
     <div class="update-bar">
       <span class="update-info" id="update-palpites">Carregando...</span>
@@ -162,15 +128,7 @@
     </div>
   </div>
 
-  <div class="section" id="sec-formulario">
-    <p class="page-title">Enviar palpites</p>
-    <p class="page-sub">Acesse o formulário para registrar seus palpites</p>
-    <div class="form-banner">
-      <h2>Formulário de palpites</h2>
-      <p>Clique no botão abaixo para preencher seus palpites para a rodada atual.</p>
-      <a class="btn-form" href="../index.html">Abrir formulário</a>
-    </div>
-  </div>
+
 
 </div>
 
@@ -181,19 +139,21 @@
 
   let prazoEncerrado = false;
 
-  function showSection(id, event) {
-    if (event) event.preventDefault();
+  function showSection(id) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('sec-' + id).classList.add('active');
-    document.getElementById('nav-' + id).classList.add('active');
-    if (window.innerWidth <= 700) toggleSidebar();
     if (id === 'palpites') carregarPalpites(false);
+    window.scrollTo(0, 0);
   }
 
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('overlay').classList.toggle('show');
+  function irParaPalpites(e) {
+    e.preventDefault();
+    showSection('palpites');
+  }
+
+  function irParaRanking(e) {
+    e.preventDefault();
+    showSection('ranking');
   }
 
   function getCache(key) {
@@ -226,13 +186,9 @@
       }
       const prazo = data.prazo_limite ? new Date(data.prazo_limite) : null;
       prazoEncerrado = prazo && new Date() >= prazo;
-      if (prazoEncerrado) {
-        document.getElementById('nav-palpites').classList.remove('hidden');
-        document.getElementById('sidebar-footer').textContent = 'Prazo encerrado';
-      } else {
-        document.getElementById('sidebar-footer').textContent = prazo
-          ? 'Prazo: ' + prazo.toLocaleDateString('pt-BR') + ' ' + prazo.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-          : 'Sem prazo definido';
+      const btnPalpites = document.getElementById('btn-ver-palpites');
+      if (!prazoEncerrado && btnPalpites) {
+        btnPalpites.style.display = 'none';
       }
     } catch(e) {}
   }

@@ -3,6 +3,7 @@ import pandas as pd
 import pytz
 from datetime import datetime
 import os
+import json
 import requests
 
 BR_TZ = pytz.timezone('America/Sao_Paulo')
@@ -52,13 +53,22 @@ def enviar_whatsapp(mensagem, EVOLUTION_PHONE):
         print('✅ Mensagem enviada no WhatsApp!')
     else:
         raise Exception(f'Erro ao enviar: {r.text}')
-    
+  
 def montar_mensagem_bom_dia(df_jogos: pd.DataFrame, df_times: pd.DataFrame):
-    current_date = datetime.now(BR_TZ).strftime('%d/%m/%Y')
+    current_dt = datetime.now(BR_TZ)
+    current_date = current_dt.strftime('%d/%m/%Y')
+
+    datas = json.loads(os.environ['DATAS'])
+    data_inicio, data_fim = datas[0], datas[1]
 
     jogos_hoje = df_jogos[df_jogos['data'] == current_date].copy()
 
     mensagem = f'*{random.choice(saudacoes)}, muito bom dia!*'
+
+    if current_date == data_inicio:
+        mensagem += '\n🔥 VALENDO! Hoje começa o bolão!'
+    elif current_date == data_fim:
+        mensagem += '\n🚨 ÚLTIMA CHANCE de subir no ranking!'
 
     if not jogos_hoje.empty:
 
@@ -82,6 +92,8 @@ def montar_mensagem_bom_dia(df_jogos: pd.DataFrame, df_times: pd.DataFrame):
     else:
         mensagem += '\nHoje infelizmente não temos nenhum jogo programado!'
 
+    mensagem += '\n\nPara mais informações acesse https://gucaaquino.github.io/bolao-copa-mundo-2026/'
+
     return mensagem
 
 def montar_mensagem_resultados(df_resultados, df_jogos, df_times):
@@ -99,14 +111,14 @@ def montar_mensagem_resultados(df_resultados, df_jogos, df_times):
 
     jogos_hoje['time_casa'] = jogos_hoje['id_time_casa'].map(mapa_times_id_to_name)
     jogos_hoje['time_fora'] = jogos_hoje['id_time_fora'].map(mapa_times_id_to_name)
-    jogos_hoje = jogos_hoje.rename(columns={'id': 'id_jogo'}).copy()
+    jogos_hoje = jogos_hoje.rename(columns={'id': 'jogo_id'}).copy()
 
-    df_resultados['gols_casa'] = pd.to_numeric(df_resultados['gols_casa'], errors='coerce')
-    df_resultados['gols_fora'] = pd.to_numeric(df_resultados['gols_fora'], errors='coerce')
+    df_resultados['gol_casa'] = pd.to_numeric(df_resultados['gol_casa'], errors='coerce')
+    df_resultados['gol_fora'] = pd.to_numeric(df_resultados['gol_fora'], errors='coerce')
 
     resultados_hoje = jogos_hoje.merge(
-        df_resultados[['id_jogo', 'gols_casa', 'gols_fora', 'status']],
-        on='id_jogo',
+        df_resultados[['jogo_id', 'gol_casa', 'gol_fora', 'status']],
+        on='jogo_id',
         how='left',
         suffixes=('_jogos', '_resultados')
     )
@@ -122,15 +134,15 @@ def montar_mensagem_resultados(df_resultados, df_jogos, df_times):
             placar = 'x'
             status = ''
             if j['status'] == 'encerrado' or j['status'] == 'em_andamento':
-                if pd.notna(j['gols_casa']) and pd.notna(j['gols_fora']):
+                if pd.notna(j['gol_casa']) and pd.notna(j['gol_fora']):
                     if j['status'] == 'encerrado':
                         status = ' ✅'
                     else:
                         status = ' 🔴'
 
-                    placar = f'{int(j["gols_casa"])} x {int(j["gols_fora"])}'
+                    placar = f'{int(j["gol_casa"])} x {int(j["gol_fora"])}'
             elif j['status'] == 'futuro':
-                placar = 'x' 
+                placar = 'x'
 
             casa = j['time_casa'] if pd.notna(j['time_casa']) else 'Time Casa Desconhecido'
             fora = j['time_fora'] if pd.notna(j['time_fora']) else 'Time Fora Desconhecido'
@@ -159,7 +171,7 @@ def montar_mensagem_ranking(df_parcial, df_usuarios):
 
     df = df.sort_values('total', ascending=False).reset_index(drop=True)
 
-    df['posicao'] = range(1, len(df) + 1)
+    df['posicao'] = df['total'].rank(method='dense', ascending=False).astype(int)
 
     menor_pontuacao = df['total'].min()
 
@@ -177,10 +189,10 @@ def montar_mensagem_ranking(df_parcial, df_usuarios):
         lanterna = ' 🔦' if row['total'] == menor_pontuacao else ''
 
         mensagem += (
-            f"\n{medalha}{row['posicao']}º - {row['alias']} "
-            f"({int(row['total'])} pts){lanterna}"
+            f'\n{medalha}{row["posicao"]}º - {row["alias"]} '
+            f'({int(row["total"])} pts){lanterna}'
         )
-    
+
     mensagem += f"\n\n🕒 Atualizado às {hora_execucao}"
 
     return mensagem

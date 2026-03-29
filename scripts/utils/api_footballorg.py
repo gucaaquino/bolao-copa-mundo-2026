@@ -24,7 +24,7 @@ def buscar_jogos_api(rodadas_filter, API_TOKEN):
 def buscar_times_api(API_TOKEN):
     r = api_request('teams', API_TOKEN)
 
-    times = [[aux['name'], aux['tla']] for aux in r.json()['teams']]
+    times = [[aux['id'], aux['name'], aux['tla']] for aux in r.json()['teams']]
     
     print(f"⚽ {len(times)} times encontrados")
 

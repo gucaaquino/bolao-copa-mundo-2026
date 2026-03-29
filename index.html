@@ -202,6 +202,10 @@
       });
 
       totalJogos = jogosData.length;
+      if (prazoLimite && new Date() >= prazoLimite) {
+        window.location.href = 'pages/ranking.html';
+        return;
+      }
       verificarPrazo();
       renderGrupos();
       atualizarProgresso();

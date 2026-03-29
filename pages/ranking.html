@@ -90,7 +90,7 @@
         <a id="btn-ver-palpites" href="#" onclick="irParaPalpites(event)" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
           👁️ Ver palpites
         </a>
-        <a href="../index.html" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
+        <a href="../index.html" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" class="btn-enviar-palpites" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
           ✏️ Enviar palpites
         </a>
       </div>
@@ -114,7 +114,7 @@
         <a href="#" onclick="irParaRanking(event)" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
           🏆 Ver ranking
         </a>
-        <a href="../index.html" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
+        <a href="../index.html" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" class="btn-enviar-palpites" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
           ✏️ Enviar palpites
         </a>
       </div>
@@ -186,10 +186,12 @@
       }
       const prazo = data.prazo_limite ? new Date(data.prazo_limite) : null;
       prazoEncerrado = prazo && new Date() >= prazo;
-      const btnPalpites = document.getElementById('btn-ver-palpites');
-      if (!prazoEncerrado && btnPalpites) {
-        btnPalpites.style.display = 'none';
+      if (!prazoEncerrado) {
+        window.location.href = '../index.html';
+        return;
       }
+      // Prazo encerrado — esconde botão enviar palpites das seções
+      document.querySelectorAll('.btn-enviar-palpites').forEach(b => b.style.display = 'none');
     } catch(e) {}
   }
 

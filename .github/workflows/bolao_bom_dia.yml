@@ -28,4 +28,5 @@ jobs:
           EVOLUTION_PHONE_ANUNCIOS: ${{ secrets.EVOLUTION_PHONE_ANUNCIOS }}
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           SHEET_ID:           ${{ secrets.SHEET_ID }}
+          DATAS:           ${{ secrets.DATAS }}
         run: python -m scripts.send_messages.send_bom_dia

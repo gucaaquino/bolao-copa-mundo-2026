@@ -30,6 +30,7 @@ jobs:
           FOOTBALL_API_TOKEN: ${{ secrets.FOOTBALL_API_TOKEN }}
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           SHEET_ID:           ${{ secrets.SHEET_ID }}
+          RODADAS:            ${{ secrets.RODADAS }}
         run: python -m scripts.atualizar_dados.atualizar_resultados
 
       - name: Atualizar Ranking

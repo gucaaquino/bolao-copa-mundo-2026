@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bolão 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; }
+
+    .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 220px; background: #fff; border-right: 1px solid #e5e5e5; display: flex; flex-direction: column; z-index: 100; }
+    .sidebar-logo { padding: 20px 20px 16px; border-bottom: 1px solid #e5e5e5; }
+    .sidebar-logo h1 { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+    .sidebar-logo p  { font-size: 12px; color: #999; margin-top: 2px; }
+    .sidebar-nav { padding: 12px 0; flex: 1; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 14px; color: #555; cursor: pointer; text-decoration: none; transition: background 0.15s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: #f5f5f3; color: #1a1a1a; }
+    .nav-item.active { background: #f0f5fb; color: #185FA5; border-left-color: #185FA5; font-weight: 600; }
+    .nav-item.hidden { display: none; }
+    .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #bbb; }
+
+    .hamburger { display: none; position: fixed; top: 14px; left: 14px; z-index: 200; background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 16px; }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 99; }
+    .overlay.show { display: block; }
+
+    .main { margin-left: 220px; padding: 2rem; max-width: 760px; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .page-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-sub   { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
+
+    .update-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    .update-info { font-size: 13px; color: #999; }
+    .btn-refresh { font-size: 13px; padding: 6px 14px; background: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; color: #555; transition: background 0.15s; }
+    .btn-refresh:hover { background: #f5f5f3; }
+
+    /* Ranking */
+    .ranking-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; }
+    .ranking-header { display: grid; grid-template-columns: 48px 1fr 80px; padding: 10px 16px; background: #f9f9f7; border-bottom: 1px solid #e5e5e5; font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
+    .ranking-row { display: grid; grid-template-columns: 48px 1fr 80px; align-items: center; padding: 13px 16px; border-bottom: 1px solid #f0f0f0; }
+    .ranking-row:last-child { border-bottom: none; }
+    .ranking-row:hover { background: #fafafa; }
+    .ranking-row.top1 { background: #fffbea; }
+    .ranking-row.top2 { background: #f9f9f9; }
+    .ranking-row.top3 { background: #fdf4ee; }
+    .pos { font-size: 14px; font-weight: 700; color: #bbb; }
+    .pos.gold   { color: #b8860b; }
+    .pos.silver { color: #888; }
+    .pos.bronze { color: #a0522d; }
+    .alias { font-size: 15px; font-weight: 600; }
+    .alias-empate { font-size: 12px; color: #bbb; margin-left: 6px; font-weight: 400; }
+    .pts { font-size: 15px; font-weight: 700; color: #185FA5; text-align: right; }
+    .pts span { font-size: 12px; font-weight: 400; color: #999; margin-left: 2px; }
+
+    /* Accordion palpites */
+    .accordion { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; }
+    .acc-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; background: #f9f9f7; cursor: pointer; user-select: none; border-bottom: 1px solid transparent; }
+    .acc-header:hover { background: #f0f0ee; }
+    .acc-header.open { border-bottom: 1px solid #e5e5e5; }
+    .acc-title { font-size: 14px; font-weight: 700; }
+    .acc-arrow { font-size: 11px; color: #aaa; transition: transform 0.2s; }
+    .acc-arrow.open { transform: rotate(180deg); }
+    .acc-body { display: none; }
+    .acc-body.open { display: block; }
+
+    .jogo-bloco { border-bottom: 1px solid #f0f0f0; }
+    .jogo-bloco:last-child { border-bottom: none; }
+    .jogo-titulo { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fdfdfd; cursor: pointer; user-select: none; }
+    .jogo-titulo:hover { background: #f9f9f7; }
+    .jogo-times { font-size: 14px; font-weight: 600; }
+    .jogo-data  { font-size: 12px; color: #999; }
+    .jogo-arrow { font-size: 10px; color: #bbb; transition: transform 0.2s; }
+    .jogo-arrow.open { transform: rotate(180deg); }
+    .jogo-palpites { display: none; padding: 0 16px 12px; }
+    .jogo-palpites.open { display: block; }
+    .pal-row { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 6px 0; border-bottom: 1px solid #f5f5f5; font-size: 14px; gap: 12px; }
+    .pal-row:last-child { border-bottom: none; }
+    .pal-nome { color: #444; }
+    .pal-placar { font-weight: 700; color: #185FA5; white-space: nowrap; }
+    .pal-count { font-size: 12px; color: #bbb; margin-left: 6px; }
+
+    /* Formulário */
+    .form-banner { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.5rem; text-align: center; }
+    .form-banner h2 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .form-banner p  { font-size: 14px; color: #666; margin-bottom: 1.25rem; }
+    .btn-form { display: inline-block; padding: 12px 28px; background: #185FA5; color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; transition: background 0.15s; }
+    .btn-form:hover { background: #0C447C; }
+
+    .state-msg { text-align: center; padding: 3rem 1rem; color: #999; font-size: 14px; }
+    .state-msg.erro { color: #c0392b; }
+
+    @media(max-width: 700px) {
+      .sidebar { transform: translateX(-100%); transition: transform 0.2s; }
+      .sidebar.open { transform: translateX(0); }
+      .hamburger { display: block; }
+      .main { margin-left: 0; padding: 1rem; padding-top: 56px; }
+    }
+  </style>
+</head>
+<body>
+
+<button class="hamburger" onclick="toggleSidebar()">☰</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <h1>Bolão 2026</h1>
+    <p>Campeonato Brasileiro</p>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="nav-item active" id="nav-ranking" onclick="showSection('ranking', event)" href="#">
+      <span class="nav-icon">🏆</span> Ranking
+    </a>
+    <a class="nav-item hidden" id="nav-palpites" onclick="showSection('palpites', event)" href="#">
+      <span class="nav-icon">👁️</span> Palpites
+    </a>
+    <a class="nav-item" id="nav-formulario" onclick="showSection('formulario', event)" href="#">
+      <span class="nav-icon">✏️</span> Enviar palpites
+    </a>
+  </nav>
+  <div class="sidebar-footer" id="sidebar-footer">Carregando...</div>
+</div>
+
+<div class="main">
+
+  <div class="section active" id="sec-ranking">
+    <p class="page-title">Ranking</p>
+    <p class="page-sub">Classificação geral do bolão</p>
+    <div class="update-bar">
+      <span class="update-info" id="update-ranking">Carregando...</span>
+      <button class="btn-refresh" onclick="carregarRanking(true)">Atualizar</button>
+    </div>
+    <div class="ranking-card" id="ranking-container">
+      <div class="state-msg">Carregando ranking...</div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-palpites">
+    <p class="page-title">Palpites</p>
+    <p class="page-sub">Veja o que cada participante apostou</p>
+    <div class="update-bar">
+      <span class="update-info" id="update-palpites">Carregando...</span>
+      <button class="btn-refresh" onclick="carregarPalpites(true)">Atualizar</button>
+    </div>
+    <div id="palpites-container">
+      <div class="state-msg">Carregando palpites...</div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-formulario">
+    <p class="page-title">Enviar palpites</p>
+    <p class="page-sub">Acesse o formulário para registrar seus palpites</p>
+    <div class="form-banner">
+      <h2>Formulário de palpites</h2>
+      <p>Clique no botão abaixo para preencher seus palpites para a rodada atual.</p>
+      <a class="btn-form" href="index.html">Abrir formulário</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDjAstNFYTkIcUG0JMSeHnSo9aw1yWui3n6JrTcLNhq5xZFVeOo0x14-GiI3JhEGKTCg/exec';
+  const CACHE_TTL_MS    = 120 * 1000;
+  const CACHE_PAL_MS    = 600 * 1000;
+
+  let prazoEncerrado = false;
+
+  function showSection(id, event) {
+    if (event) event.preventDefault();
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('sec-' + id).classList.add('active');
+    document.getElementById('nav-' + id).classList.add('active');
+    if (window.innerWidth <= 700) toggleSidebar();
+    if (id === 'palpites') carregarPalpites(false);
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('show');
+  }
+
+  function getCache(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const { dados, ts, ttl } = JSON.parse(raw);
+      if (Date.now() - ts > ttl) return null;
+      return dados;
+    } catch(e) { return null; }
+  }
+
+  function setCache(key, dados, ttl) {
+    try { localStorage.setItem(key, JSON.stringify({ dados, ts: Date.now(), ttl })); } catch(e) {}
+  }
+
+  function tsLabel() {
+    return 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // Verifica prazo e mostra/esconde aba palpites
+  async function verificarPrazo() {
+    try {
+      const cached = getCache('bolao_jogos');
+      let data = cached;
+      if (!data) {
+        const res = await fetch(APPS_SCRIPT_URL);
+        data = await res.json();
+        setCache('bolao_jogos', data, CACHE_TTL_MS);
+      }
+      const prazo = data.prazo_limite ? new Date(data.prazo_limite) : null;
+      prazoEncerrado = prazo && new Date() >= prazo;
+      if (prazoEncerrado) {
+        document.getElementById('nav-palpites').classList.remove('hidden');
+        document.getElementById('sidebar-footer').textContent = 'Prazo encerrado';
+      } else {
+        document.getElementById('sidebar-footer').textContent = prazo
+          ? 'Prazo: ' + prazo.toLocaleDateString('pt-BR') + ' ' + prazo.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+          : 'Sem prazo definido';
+      }
+    } catch(e) {}
+  }
+
+  async function carregarRanking(forcar) {
+    const container = document.getElementById('ranking-container');
+    const info      = document.getElementById('update-ranking');
+
+    if (!forcar) {
+      const cached = getCache('bolao_ranking');
+      if (cached) { renderRanking(cached); info.textContent = tsLabel(); return; }
+    }
+
+    container.innerHTML = '<div class="state-msg">Carregando...</div>';
+    try {
+      const res  = await fetch(APPS_SCRIPT_URL + '?acao=ranking');
+      const data = await res.json();
+      setCache('bolao_ranking', data, CACHE_TTL_MS);
+      info.textContent = tsLabel();
+      renderRanking(data);
+    } catch(e) {
+      container.innerHTML = '<div class="state-msg erro">Erro ao carregar. Tente novamente.</div>';
+    }
+  }
+
+  function renderRanking(data) {
+    const container = document.getElementById('ranking-container');
+    if (!data || !data.ranking || !data.ranking.length) {
+      container.innerHTML = '<div class="state-msg">Nenhum dado disponível ainda.</div>';
+      return;
+    }
+    const lista = [...data.ranking].sort((a, b) => b.total - a.total);
+    let pos = 1;
+    lista.forEach((item, i) => {
+      if (i > 0 && item.total < lista[i-1].total) pos = i + 1;
+      item._pos    = pos;
+      item._empate = lista.filter(x => x.total === item.total).length > 1;
+    });
+
+    let html = `<div class="ranking-header"><div>Pos</div><div>Participante</div><div style="text-align:right">Pontos</div></div>`;
+    lista.forEach(item => {
+      const topClass = item._pos === 1 ? 'top1' : item._pos === 2 ? 'top2' : item._pos === 3 ? 'top3' : '';
+      const posClass = { 1: 'gold', 2: 'silver', 3: 'bronze' }[item._pos] || '';
+      const empate   = item._empate ? '<span class="alias-empate">(empate)</span>' : '';
+      html += `<div class="ranking-row ${topClass}">
+        <div class="pos ${posClass}">${item._pos}º</div>
+        <div class="alias">${item.alias}${empate}</div>
+        <div class="pts">${Math.round(item.total)}<span>pts</span></div>
+      </div>`;
+    });
+    container.innerHTML = html;
+  }
+
+  async function carregarPalpites(forcar) {
+    const container = document.getElementById('palpites-container');
+    const info      = document.getElementById('update-palpites');
+
+    if (!forcar) {
+      const cached = getCache('bolao_palpites');
+      if (cached) { renderPalpites(cached); info.textContent = tsLabel(); return; }
+    }
+
+    container.innerHTML = '<div class="state-msg">Carregando...</div>';
+    try {
+      const res  = await fetch(APPS_SCRIPT_URL + '?acao=palpites');
+      const data = await res.json();
+      setCache('bolao_palpites', data, CACHE_PAL_MS);
+      info.textContent = tsLabel();
+      renderPalpites(data);
+    } catch(e) {
+      container.innerHTML = '<div class="state-msg erro">Erro ao carregar. Tente novamente.</div>';
+    }
+  }
+
+  function renderPalpites(data) {
+    const container = document.getElementById('palpites-container');
+    if (!data || !data.grupos || !Object.keys(data.grupos).length) {
+      container.innerHTML = '<div class="state-msg">Nenhum palpite disponível.</div>';
+      return;
+    }
+
+    let html = '';
+    let gi   = 0;
+    for (const [grupo, jogos] of Object.entries(data.grupos)) {
+      html += `<div class="accordion">
+        <div class="acc-header open" onclick="toggleAcc(this)">
+          <span class="acc-title">${grupo}</span>
+          <span class="acc-arrow open">▼</span>
+        </div>
+        <div class="acc-body open">`;
+
+      jogos.forEach((jogo, ji) => {
+        const palCount = jogo.palpites ? jogo.palpites.length : 0;
+        html += `<div class="jogo-bloco">
+          <div class="jogo-titulo" onclick="toggleJogo(this)">
+            <div>
+              <div class="jogo-times">${jogo.time_casa} × ${jogo.time_fora}</div>
+              <div class="jogo-data">${jogo.data} • ${jogo.hora} <span class="pal-count">${palCount} palpite${palCount !== 1 ? 's' : ''}</span></div>
+            </div>
+            <span class="jogo-arrow">▼</span>
+          </div>
+          <div class="jogo-palpites">`;
+
+        if (palCount === 0) {
+          html += `<p style="font-size:13px;color:#bbb;padding:8px 0;">Nenhum palpite ainda.</p>`;
+        } else {
+          jogo.palpites.forEach(p => {
+            html += `<div class="pal-row">
+              <span class="pal-nome">${p.participante}</span>
+              <span class="pal-placar">${p.gol_casa} × ${p.gol_fora}</span>
+            </div>`;
+          });
+        }
+
+        html += `</div></div>`;
+      });
+
+      html += `</div></div>`;
+      gi++;
+    }
+    container.innerHTML = html;
+  }
+
+  function toggleAcc(header) {
+    const body  = header.nextElementSibling;
+    const arrow = header.querySelector('.acc-arrow');
+    const open  = body.classList.contains('open');
+    body.classList.toggle('open', !open);
+    header.classList.toggle('open', !open);
+    arrow.classList.toggle('open', !open);
+  }
+
+  function toggleJogo(titulo) {
+    const palpites = titulo.nextElementSibling;
+    const arrow    = titulo.querySelector('.jogo-arrow');
+    const open     = palpites.classList.contains('open');
+    palpites.classList.toggle('open', !open);
+    arrow.classList.toggle('open', !open);
+  }
+
+  verificarPrazo();
+  carregarRanking(false);
+</script>
+</body>
+</html>

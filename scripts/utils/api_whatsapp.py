@@ -165,6 +165,7 @@ def montar_mensagem_ranking(df_parcial, df_usuarios):
         return None
 
     df = df_parcial.copy()
+    todos_iguais = df['total'].nunique() == 1
 
     df = df.merge(df_usuarios, on='email', how='left')
     df['nome'] = df['nome'].fillna(df['email'])
@@ -186,7 +187,7 @@ def montar_mensagem_ranking(df_parcial, df_usuarios):
         elif row['posicao'] == 3:
             medalha = '🥉 '
 
-        lanterna = ' 🔦' if row['total'] == menor_pontuacao else ''
+        lanterna = ' 🔦' if (not todos_iguais and row['total'] == menor_pontuacao) else ''
 
         mensagem += (
             f'\n{medalha}{row["posicao"]}º - {row["alias"]} '

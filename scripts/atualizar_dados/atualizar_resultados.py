@@ -11,7 +11,7 @@ gc        = ag.autenticar_sheets()
 def atualizar():
     jogos_api = af.buscar_jogos_api(RODADAS, API_TOKEN)
 
-    # ag.montar_planilha_resultados(gc, jogos_api, SHEET_ID)
+    ag.montar_planilha_resultados(gc, jogos_api, SHEET_ID)
 
 if __name__ == '__main__':
     atualizar()

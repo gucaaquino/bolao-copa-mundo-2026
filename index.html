@@ -178,7 +178,6 @@
 </div>
 
 <script>
-  // ⚠️ SUBSTITUA PELA URL DO SEU GOOGLE APPS SCRIPT APÓS PUBLICAR
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDjAstNFYTkIcUG0JMSeHnSo9aw1yWui3n6JrTcLNhq5xZFVeOo0x14-GiI3JhEGKTCg/exec';
 
   let jogosData    = [];
@@ -202,7 +201,8 @@
       });
 
       totalJogos = jogosData.length;
-      if (prazoLimite && new Date() >= prazoLimite) {
+      const agora = new Date();
+      if (prazoLimite && agora >= prazoLimite) {
         window.location.href = 'pages/ranking.html';
         return;
       }

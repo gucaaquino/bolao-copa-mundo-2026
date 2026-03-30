@@ -148,11 +148,19 @@ def montar_planilha_pontuacao_usuario(gc, apostas, resultados, pontuacao, SHEET_
 
     preencher_planilha_df(gc, 'pontuacao_usuario', df_final, SHEET_ID)
 
-def montar_planilha_parcial_usuario(gc, pontuacao_usuario, jogos, SHEET_ID):
+def montar_planilha_parcial_usuario(gc, pontuacao_usuario, jogos, usuarios, SHEET_ID):
 
     if pontuacao_usuario.empty:
-        preencher_planilha(gc, 'parcial_usuario', [['email', 'total']], SHEET_ID)
-        return None
+        df_base = usuarios[['email']].copy()
+
+        grupos = jogos['grupo'].dropna().unique()
+
+        for g in grupos:
+            df_base[f'grupo_{g}'] = 0
+
+        df_base['total'] = 0
+
+        preencher_planilha_df(gc, 'parcial_usuario', df_base, SHEET_ID)
 
     mapa_grupos = dict(zip(jogos['id'], jogos['grupo']))
     pontuacao_usuario['grupo'] = pontuacao_usuario['jogo_id'].map(mapa_grupos)
@@ -174,6 +182,7 @@ def montar_planilha_parcial_usuario(gc, pontuacao_usuario, jogos, SHEET_ID):
     df_pivot['total'] = df_pivot.sum(axis=1)
 
     df_final = df_pivot.reset_index()
+    df_final = usuarios[['email']].merge(df_final, on='email', how='left').fillna(0)
 
     preencher_planilha_df(gc, 'parcial_usuario', df_final, SHEET_ID)
 

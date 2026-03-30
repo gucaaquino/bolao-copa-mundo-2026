@@ -161,6 +161,7 @@ def montar_planilha_parcial_usuario(gc, pontuacao_usuario, jogos, usuarios, SHEE
         df_base['total'] = 0
 
         preencher_planilha_df(gc, 'parcial_usuario', df_base, SHEET_ID)
+        return None
 
     mapa_grupos = dict(zip(jogos['id'], jogos['grupo']))
     pontuacao_usuario['grupo'] = pontuacao_usuario['jogo_id'].map(mapa_grupos)

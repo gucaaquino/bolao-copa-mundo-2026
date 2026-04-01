@@ -126,6 +126,7 @@ def montar_mensagem_resultados(df_resultados, df_jogos, df_times):
     resultados_hoje = resultados_hoje.sort_values(by=['grupo', 'hora'])
 
     mensagem = '📊 *Resultados dos jogos de hoje:*'
+    mensagem += '\n⚠️ *Jogos que já iniciaram contam para o ranking*'
 
     for grupo, df_grupo in resultados_hoje.groupby('grupo'):
         mensagem += f'\n\n*Grupo {grupo}:*'
@@ -138,7 +139,7 @@ def montar_mensagem_resultados(df_resultados, df_jogos, df_times):
                     if j['status'] == 'encerrado':
                         status = ' ✅'
                     else:
-                        status = ' 🔴'
+                        status = ' ⏳'
 
                     placar = f'{int(j["gol_casa"])} x {int(j["gol_fora"])}'
             elif j['status'] == 'futuro':
@@ -150,8 +151,8 @@ def montar_mensagem_resultados(df_resultados, df_jogos, df_times):
             mensagem += f'\n - {j["hora"]} | {casa} {placar} {fora}{status}'
 
     mensagem += '\n\nLegenda:'
-    mensagem += '\n✅ Jogo computado'
-    mensagem += '\n🔴 Jogo sendo computado'
+    mensagem += '\n✅ Jogo encerrado'
+    mensagem += '\n⏳ Jogo em andamento'
     mensagem += f'\n\n🕒 Atualizado às {hora_execucao}'
 
     return mensagem

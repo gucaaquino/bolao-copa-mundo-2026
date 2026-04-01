@@ -97,7 +97,7 @@ def montar_planilha_usuarios(gc, apostas, SHEET_ID):
     preencher_planilha_df(gc, 'usuarios', usuarios, SHEET_ID)
 
 def montar_planilha_pontuacao_usuario(gc, apostas, resultados, pontuacao, SHEET_ID):
-    resultados_enc = resultados[resultados['status'] == 'encerrado'].copy()
+    resultados_enc = resultados[~(resultados['status'] == 'futuro')].copy()
     df = apostas.merge(
         resultados_enc,
         on='jogo_id',

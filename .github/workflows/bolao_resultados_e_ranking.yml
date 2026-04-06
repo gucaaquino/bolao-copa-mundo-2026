@@ -3,10 +3,10 @@ name: Bolão - Mensagem Resultados e Ranking
 on:
   schedule:
     # 20:30 BRT (UTC-3 → 23:30 UTC) dias 1 e 2
-    - cron: '30 23 1,2 4 *'
+    - cron: '30 23 * * *'
 
     # 21:30, 22:30, 23:30 BRT → 00:30, 01:30, 02:30 UTC (dias 2 e 3)
-    - cron: '30 0-2 2,3 4 *'
+    - cron: '30 0-2 * * *'
   workflow_dispatch: 
 
 jobs:

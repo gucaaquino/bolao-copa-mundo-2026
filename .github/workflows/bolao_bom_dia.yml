@@ -2,7 +2,7 @@ name: Bolão - Mensagem Bom Dia
 
 on:
   schedule:
-    - cron: '0 11 1,2 4 *'
+    - cron: '0 11 * * *'
   workflow_dispatch: 
 
 jobs:

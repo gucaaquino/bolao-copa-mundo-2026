@@ -57,8 +57,7 @@ def montar_planilha_jogos(gc, jogos, SHEET_ID):
         data, hora = formatar_data_hora(p.get('utcDate'))
         id_casa    = p['homeTeam'].get('id')
         id_fora    = p['awayTeam'].get('id')
-
-        grupo = random.choice(['A', 'B'])
+        grupo      = p['group'].split('_')[1]
 
         dados.append([id, data, hora, id_casa, id_fora, grupo])
 
@@ -91,12 +90,22 @@ def montar_planilha_times(gc, times, SHEET_ID):
 
 def montar_planilha_usuarios(gc, apostas, SHEET_ID):
 
+    if apostas.empty:
+        preencher_planilha(gc, 'usuarios', [['email', 'nome', 'telefone']], SHEET_ID)
+        return
+
     usuarios = apostas[['email', 'nome', 'telefone']].drop_duplicates().copy()
     usuarios['alias'] = usuarios['nome'].apply(lambda x: f'{x.split()[0]} {x.split()[-1]}' if len(x.split()) > 1 else x)
 
     preencher_planilha_df(gc, 'usuarios', usuarios, SHEET_ID)
 
 def montar_planilha_pontuacao_usuario(gc, apostas, resultados, pontuacao, SHEET_ID):
+
+    if apostas.empty or resultados.empty or pontuacao.empty:
+        columns = ['email', 'jogo_id', 'gol_casa', 'gol_fora', 'palpite_casa', 'palpite_fora', 'pontos']
+        preencher_planilha(gc, 'pontuacao_usuario', [columns], SHEET_ID)
+        return
+
     resultados_enc = resultados[~(resultados['status'] == 'futuro')].copy()
     df = apostas.merge(
         resultados_enc,
@@ -149,6 +158,10 @@ def montar_planilha_pontuacao_usuario(gc, apostas, resultados, pontuacao, SHEET_
     preencher_planilha_df(gc, 'pontuacao_usuario', df_final, SHEET_ID)
 
 def montar_planilha_parcial_usuario(gc, pontuacao_usuario, jogos, usuarios, SHEET_ID):
+
+    if jogos.empty or usuarios.empty:
+        preencher_planilha(gc, 'parcial_usuario', [['total']], SHEET_ID)
+        return
 
     if pontuacao_usuario.empty:
         df_base = usuarios[['email']].copy()

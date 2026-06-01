@@ -32,6 +32,11 @@
     .campo input:focus { outline: none; border-color: #185FA5; box-shadow: 0 0 0 3px rgba(24,95,165,0.1); }
     .err { font-size: 13px; color: #c0392b; margin-top: 3px; display: none; }
 
+    /* Rascunho salvo */
+    .rascunho-aviso { display: none; background: #fffbea; border: 1px solid #f5e6a3; border-radius: 8px; padding: 9px 14px; margin-bottom: 1rem; font-size: 13px; color: #7d5a00; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .rascunho-aviso span { flex: 1; }
+    .rascunho-limpar { background: none; border: none; font-size: 13px; color: #7d5a00; cursor: pointer; text-decoration: underline; padding: 0; flex-shrink: 0; }
+
     /* Accordion */
     .accordion { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; }
     .acc-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; background: #f9f9f7; cursor: pointer; user-select: none; border-bottom: 1px solid transparent; transition: background 0.15s; }
@@ -55,16 +60,28 @@
     .time { font-size: 15px; font-weight: 600; }
     .data { font-size: 12px; color: #999; margin-top: 2px; }
     .placar { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .placar input { width: 46px; height: 46px; text-align: center; font-size: 20px; font-weight: 600; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; transition: border-color 0.15s; }
+    .placar input {
+      width: 46px; height: 46px; text-align: center; font-size: 20px; font-weight: 600;
+      border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a;
+      transition: border-color 0.15s;
+      /* Remove setas do input number */
+      -moz-appearance: textfield;
+    }
+    .placar input::-webkit-inner-spin-button,
+    .placar input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     .placar input:focus { outline: none; border-color: #185FA5; box-shadow: 0 0 0 3px rgba(24,95,165,0.1); }
     .sep { font-size: 16px; color: #ccc; }
 
     /* Botões */
-    .btn { width: 100%; padding: 13px; font-size: 16px; font-weight: 600; background: #185FA5; color: #fff; border: none; border-radius: 10px; cursor: pointer; transition: background 0.15s; }
+    .btn { width: 100%; padding: 13px; font-size: 16px; font-weight: 600; background: #185FA5; color: #fff; border: none; border-radius: 10px; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .btn:hover:not(:disabled) { background: #0C447C; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-sec { width: 100%; padding: 12px; font-size: 15px; font-weight: 500; background: transparent; color: #555; border: 1px solid #ddd; border-radius: 10px; cursor: pointer; margin-top: 8px; transition: background 0.15s; }
     .btn-sec:hover { background: #f5f5f3; }
+
+    /* Spinner */
+    .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .global-err { font-size: 13px; color: #c0392b; margin-bottom: 10px; display: none; text-align: center; padding: 10px; background: #fdf0ef; border-radius: 8px; }
 
@@ -90,10 +107,15 @@
     .success-card { text-align: center; padding: 2rem 1.5rem; background: #eafaf1; border: 1px solid #a9dfbf; border-radius: 12px; margin-bottom: 1.25rem; }
     .success-card h2 { color: #1e8449; font-size: 20px; font-weight: 600; margin-bottom: 6px; }
     .success-card p { color: #27ae60; font-size: 14px; }
-    .resumo-final { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; }
+    .resumo-final { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; }
     .resumo-final-header { padding: 10px 16px; background: #f9f9f7; border-bottom: 1px solid #e5e5e5; font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
     .resumo-final-body { padding: 16px; }
     .resumo-info { font-size: 13px; color: #666; margin-bottom: 14px; line-height: 1.8; }
+
+    /* Botão copiar */
+    .btn-copiar { width: 100%; padding: 12px; font-size: 15px; font-weight: 500; background: transparent; color: #185FA5; border: 1px solid #185FA5; border-radius: 10px; cursor: pointer; margin-top: 8px; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-copiar:hover { background: #f0f5fb; }
+    .btn-copiar.copiado { color: #1e8449; border-color: #1e8449; background: #eafaf1; }
 
     #loading-jogos { text-align: center; color: #999; font-size: 14px; padding: 2rem 0; }
   </style>
@@ -111,6 +133,12 @@
 
   <div class="prazo-aviso" id="prazo-aviso"></div>
 
+  <!-- Aviso de rascunho salvo -->
+  <div class="rascunho-aviso" id="rascunho-aviso" style="display:none;">
+    <span>📝 Rascunho restaurado automaticamente</span>
+    <button class="rascunho-limpar" onclick="limparRascunho()">Limpar</button>
+  </div>
+
   <div class="prog-wrap">
     <div class="prog-topo">
       <span class="prog-label">Progresso geral</span>
@@ -124,18 +152,19 @@
     <div class="campos">
       <div class="campo full">
         <label>Nome completo</label>
-        <input type="text" id="nome" placeholder="Ex: João Silva" />
+        <input type="text" id="nome" placeholder="Ex: João Silva" oninput="salvarRascunho()" />
         <span class="err" id="err-nome">Informe seu nome</span>
       </div>
       <div class="campo">
         <label>E-mail</label>
-        <input type="email" id="email" placeholder="joao@email.com" />
+        <input type="email" id="email" placeholder="joao@email.com" oninput="salvarRascunho()" />
         <span class="err" id="err-email">Informe um e-mail válido</span>
       </div>
       <div class="campo">
         <label>WhatsApp</label>
-        <input type="tel" id="telefone" placeholder="(19) 99999-9999" />
-        <span class="err" id="err-tel">Informe seu número</span>
+        <input type="tel" id="telefone" placeholder="(19) 99999-9999"
+               oninput="mascaraTel(this)" inputmode="numeric" />
+        <span class="err" id="err-tel">Informe um número válido</span>
       </div>
     </div>
   </div>
@@ -157,7 +186,7 @@
     <h2>Revisar palpites</h2>
     <p class="sub" id="modal-sub"></p>
     <div id="modal-resumo"></div>
-    <button class="btn" onclick="enviar()">Confirmar e enviar</button>
+    <button class="btn" id="btn-confirmar" onclick="enviar()">Confirmar e enviar</button>
     <button class="btn-sec" onclick="fecharModal()">Voltar e editar</button>
   </div>
 </div>
@@ -165,23 +194,100 @@
 <!-- Página de sucesso -->
 <div class="wrap success" id="success-view">
   <div class="success-card">
-    <h2>Palpites enviados!</h2>
+    <h2>Palpites enviados! 🎉</h2>
     <p id="success-msg"></p>
   </div>
   <div class="resumo-final">
     <div class="resumo-final-header">Seu resumo</div>
     <div class="resumo-final-body" id="resumo-final-body"></div>
   </div>
+  <button class="btn-copiar" id="btn-copiar" onclick="copiarResumo()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    <span id="btn-copiar-texto">Copiar resumo</span>
+  </button>
 </div>
 
 <script>
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDjAstNFYTkIcUG0JMSeHnSo9aw1yWui3n6JrTcLNhq5xZFVeOo0x14-GiI3JhEGKTCg/exec';
+  const STORAGE_KEY = 'bolao_rascunho';
 
-  let jogosData    = [];
-  let gruposData   = {};
-  let totalJogos   = 0;
-  let prazoLimite  = null;
+  let jogosData   = [];
+  let gruposData  = {};
+  let totalJogos  = 0;
+  let prazoLimite = null;
 
+  /* ─── MÁSCARA DE TELEFONE ─── */
+  function mascaraTel(input) {
+    let v = input.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length === 0) { input.value = ''; }
+    else if (v.length <= 2) { input.value = `(${v}`; }
+    else if (v.length <= 6) { input.value = `(${v.slice(0,2)}) ${v.slice(2)}`; }
+    else if (v.length <= 10) { input.value = `(${v.slice(0,2)}) ${v.slice(2,6)}-${v.slice(6)}`; }
+    else { input.value = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`; }
+    salvarRascunho();
+  }
+
+  /* ─── RASCUNHO AUTOMÁTICO ─── */
+  function salvarRascunho() {
+    const dados = {
+      nome:     document.getElementById('nome').value,
+      email:    document.getElementById('email').value,
+      telefone: document.getElementById('telefone').value,
+      palpites: {},
+    };
+    document.querySelectorAll('.jogo:not(.encerrado)').forEach(j => {
+      const g1 = j.querySelector('.g1').value;
+      const g2 = j.querySelector('.g2').value;
+      if (g1 !== '' || g2 !== '') {
+        dados.palpites[j.dataset.id] = { g1, g2 };
+      }
+    });
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(dados)); } catch(e) {}
+  }
+
+  function restaurarRascunho() {
+    let raw;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch(e) { return; }
+    if (!raw) return;
+    let dados;
+    try { dados = JSON.parse(raw); } catch(e) { return; }
+
+    if (dados.nome)     document.getElementById('nome').value     = dados.nome;
+    if (dados.email)    document.getElementById('email').value    = dados.email;
+    if (dados.telefone) document.getElementById('telefone').value = dados.telefone;
+
+    if (dados.palpites && Object.keys(dados.palpites).length > 0) {
+      document.querySelectorAll('.jogo:not(.encerrado)').forEach(j => {
+        const p = dados.palpites[j.dataset.id];
+        if (p) {
+          j.querySelector('.g1').value = p.g1;
+          j.querySelector('.g2').value = p.g2;
+        }
+      });
+      document.getElementById('rascunho-aviso').style.display = 'flex';
+    }
+
+    // Atualiza badges e progresso após restaurar
+    Object.entries(gruposData).forEach((_, gi) => {
+      const jogos = gruposData[Object.keys(gruposData)[gi]];
+      atualizar(gi, jogos.length);
+    });
+  }
+
+  function limparRascunho() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    document.getElementById('rascunho-aviso').style.display = 'none';
+    document.getElementById('nome').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('telefone').value = '';
+    document.querySelectorAll('.jogo .g1, .jogo .g2').forEach(i => i.value = '');
+    Object.entries(gruposData).forEach((_, gi) => {
+      const jogos = gruposData[Object.keys(gruposData)[gi]];
+      atualizar(gi, jogos.length);
+    });
+  }
+
+  /* ─── CARREGAMENTO ─── */
   async function carregarJogos() {
     try {
       const res  = await fetch(APPS_SCRIPT_URL);
@@ -189,7 +295,6 @@
       jogosData  = data.jogos || [];
       prazoLimite = data.prazo_limite ? new Date(data.prazo_limite) : null;
 
-      // Agrupa por grupo
       gruposData = {};
       jogosData.forEach(j => {
         const g = j.grupo || 'Jogos';
@@ -205,6 +310,7 @@
       }
       verificarPrazo();
       renderGrupos();
+      restaurarRascunho();
       atualizarProgresso();
     } catch (err) {
       document.getElementById('loading-jogos').innerHTML =
@@ -234,13 +340,17 @@
     }
   }
 
+  /* ─── RENDER DOS GRUPOS ─── */
   function renderGrupos() {
     const container = document.getElementById('jogos-container');
-    const agora     = new Date();
+    const agora = new Date();
     let html = '';
-    let gi   = 0;
+    let gi = 0;
 
-    for (const [grupo, jogos] of Object.entries(gruposData)) {
+    const gruposOrdenados = Object.entries(gruposData)
+        .sort(([a], [b]) => a.localeCompare(b, 'pt-BR'));
+
+    for (const [grupo, jogos] of gruposOrdenados) {
       html += `
         <div class="accordion" id="acc-${gi}">
           <div class="acc-header ${gi===0?'open':''}" onclick="toggleAcc(${gi})">
@@ -253,9 +363,7 @@
           <div class="acc-body ${gi===0?'open':''}" id="body-${gi}">`;
 
       jogos.forEach(j => {
-        let encerrado = false;
-        if (prazoLimite && agora >= prazoLimite) encerrado = true;
-
+        const encerrado = !!(prazoLimite && agora >= prazoLimite);
         html += `
             <div class="jogo${encerrado?' encerrado':''}" data-id="${j.id}" data-casa="${j.time_casa}" data-fora="${j.time_fora}">
               <div class="time-info">
@@ -263,9 +371,13 @@
                 <div class="data">${j.data} • ${j.hora}${encerrado?' • Encerrado':''}</div>
               </div>
               <div class="placar">
-                <input type="number" min="0" max="9" placeholder="0" class="g1" oninput="atualizar(${gi},${jogos.length})" ${encerrado?'disabled':''} />
+                <input type="number" min="0" max="9" inputmode="numeric" placeholder="0" class="g1"
+                  oninput="sanitizarPlacar(this,${gi},${jogos.length},'g2')"
+                  ${encerrado?'disabled':''} />
                 <span class="sep">×</span>
-                <input type="number" min="0" max="9" placeholder="0" class="g2" oninput="atualizar(${gi},${jogos.length})" ${encerrado?'disabled':''} />
+                <input type="number" min="0" max="9" inputmode="numeric" placeholder="0" class="g2"
+                  oninput="sanitizarPlacar(this,${gi},${jogos.length},null)"
+                  ${encerrado?'disabled':''} />
               </div>
               <div class="time-info right">
                 <div class="time">${j.time_fora}</div>
@@ -281,6 +393,26 @@
     container.innerHTML = html;
   }
 
+  /* ─── SANITIZAÇÃO + AVANÇO DE FOCO ─── */
+  function sanitizarPlacar(input, gi, total, proximaClasse) {
+    // Garante valor entre 0 e 9, sem decimais
+    let v = input.value.replace(/[^0-9]/g, '');
+    if (v.length > 1) v = v.slice(-1); // aceita só 1 dígito
+    if (v === '') { input.value = ''; }
+    else {
+      const n = Math.min(9, Math.max(0, parseInt(v)));
+      input.value = n;
+      // Avança foco para o campo do time visitante se existir
+      if (proximaClasse) {
+        const prox = input.closest('.placar').querySelector('.' + proximaClasse);
+        if (prox) prox.focus();
+      }
+    }
+    atualizar(gi, total);
+    salvarRascunho();
+  }
+
+  /* ─── ACCORDION ─── */
   function toggleAcc(gi) {
     const header = document.querySelector(`#acc-${gi} .acc-header`);
     const body   = document.getElementById(`body-${gi}`);
@@ -293,12 +425,14 @@
 
   function atualizar(gi, total) {
     const body  = document.getElementById(`body-${gi}`);
+    if (!body) return;
     const jogos = body.querySelectorAll('.jogo:not(.encerrado)');
     let count   = 0;
     jogos.forEach(j => {
       if (j.querySelector('.g1').value !== '' && j.querySelector('.g2').value !== '') count++;
     });
     const badge = document.getElementById(`badge-${gi}`);
+    if (!badge) return;
     badge.textContent = count === total ? 'Completo' : `${count}/${total} preenchidos`;
     badge.className   = 'acc-badge' + (count === total ? ' completo' : '');
 
@@ -310,8 +444,8 @@
   }
 
   function atualizarProgresso() {
-    const todos      = document.querySelectorAll('.jogo:not(.encerrado)');
-    let preenchidos  = 0;
+    const todos     = document.querySelectorAll('.jogo:not(.encerrado)');
+    let preenchidos = 0;
     todos.forEach(j => {
       if (j.querySelector('.g1').value !== '' && j.querySelector('.g2').value !== '') preenchidos++;
     });
@@ -321,8 +455,9 @@
     document.getElementById('prog-num').textContent  = `${preenchidos} de ${totalJogos} jogos`;
   }
 
+  /* ─── COLETA DE PALPITES ─── */
   function coletarPalpites() {
-    const jogoEls = document.querySelectorAll('.jogo:not(.encerrado)');
+    const jogoEls  = document.querySelectorAll('.jogo:not(.encerrado)');
     const palpites = [];
     let incompleto = false;
     jogoEls.forEach(j => {
@@ -342,6 +477,7 @@
 
   function validarEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
+  /* ─── ABERTURA DO MODAL ─── */
   function abrirConfirmacao() {
     const nome  = document.getElementById('nome').value.trim();
     const email = document.getElementById('email').value.trim();
@@ -350,20 +486,42 @@
     document.querySelectorAll('.err').forEach(e => e.style.display = 'none');
     document.querySelectorAll('.global-err').forEach(e => e.style.display = 'none');
 
-    // Verifica prazo novamente no momento do envio
     if (prazoLimite && new Date() >= prazoLimite) {
       document.getElementById('err-prazo').style.display = 'block';
       return;
     }
 
     let ok = true;
-    if (!nome)                { document.getElementById('err-nome').style.display  = 'block'; ok = false; }
-    if (!validarEmail(email)) { document.getElementById('err-email').style.display = 'block'; ok = false; }
-    if (!tel)                 { document.getElementById('err-tel').style.display   = 'block'; ok = false; }
+    let primeiroErro = null;
+
+    if (!nome) {
+      const el = document.getElementById('err-nome'); el.style.display = 'block';
+      if (!primeiroErro) primeiroErro = document.getElementById('nome');
+      ok = false;
+    }
+    if (!validarEmail(email)) {
+      const el = document.getElementById('err-email'); el.style.display = 'block';
+      if (!primeiroErro) primeiroErro = document.getElementById('email');
+      ok = false;
+    }
+    // Valida telefone: mínimo 14 chars com máscara (ex: "(19) 99999-9999")
+    const telLimpo = tel.replace(/\D/g, '');
+    if (telLimpo.length < 10) {
+      const el = document.getElementById('err-tel'); el.style.display = 'block';
+      if (!primeiroErro) primeiroErro = document.getElementById('telefone');
+      ok = false;
+    }
 
     const { palpites, incompleto } = coletarPalpites();
-    if (incompleto) { document.getElementById('err-palpites').style.display = 'block'; ok = false; }
-    if (!ok) return;
+    if (incompleto) {
+      document.getElementById('err-palpites').style.display = 'block';
+      ok = false;
+    }
+
+    if (!ok) {
+      if (primeiroErro) primeiroErro.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     // Monta resumo no modal
     document.getElementById('modal-sub').textContent = `${nome}, confira seus palpites antes de confirmar:`;
@@ -384,6 +542,7 @@
     document.getElementById('modal').classList.remove('show');
   }
 
+  /* ─── ENVIO ─── */
   async function enviar() {
     fecharModal();
     const nome  = document.getElementById('nome').value.trim();
@@ -392,8 +551,8 @@
     const { palpites } = coletarPalpites();
 
     const btn = document.getElementById('btn-enviar');
-    btn.disabled    = true;
-    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Enviando...';
 
     try {
       const res  = await fetch(APPS_SCRIPT_URL, {
@@ -403,11 +562,14 @@
       const data = await res.json();
 
       if (data.status === 'prazo_encerrado') {
-        btn.disabled    = false;
-        btn.textContent = 'Revisar e enviar';
+        btn.disabled = false;
+        btn.innerHTML = 'Revisar e enviar';
         document.getElementById('err-prazo').style.display = 'block';
         return;
       }
+
+      // Limpa rascunho após envio bem-sucedido
+      try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
 
       // Monta página de sucesso
       let html = `<p class="resumo-info">👤 ${nome}<br>📧 ${email}<br>📱 ${tel}</p>`;
@@ -419,16 +581,59 @@
         });
       }
 
+      // Guarda palpites para copiar depois
+      window._palpitesParaCopiar = { nome, email, tel, palpites };
+
       document.getElementById('success-msg').textContent = `${nome}, seus palpites foram registrados com sucesso!`;
       document.getElementById('resumo-final-body').innerHTML = html;
       document.getElementById('form-view').style.display = 'none';
       document.getElementById('success-view').classList.add('show');
 
     } catch (err) {
-      btn.disabled    = false;
-      btn.textContent = 'Revisar e enviar';
+      btn.disabled = false;
+      btn.innerHTML = 'Revisar e enviar';
       document.getElementById('err-envio').style.display = 'block';
     }
+  }
+
+  /* ─── COPIAR RESUMO ─── */
+  function copiarResumo() {
+    const d = window._palpitesParaCopiar;
+    if (!d) return;
+
+    let texto = `🏆 Bolão Copa do Mundo — Palpites de ${d.nome}\n\n`;
+    for (const [grupo, jogos] of Object.entries(gruposData)) {
+      texto += `📋 ${grupo}\n`;
+      jogos.forEach(j => {
+        const p = d.palpites.find(x => x.jogo_id == j.id);
+        if (p) texto += `  ${j.time_casa} ${p.gol_casa} × ${p.gol_fora} ${j.time_fora}\n`;
+      });
+      texto += '\n';
+    }
+
+    navigator.clipboard.writeText(texto).then(() => {
+      const btn = document.getElementById('btn-copiar');
+      const txt = document.getElementById('btn-copiar-texto');
+      btn.classList.add('copiado');
+      txt.textContent = 'Copiado!';
+      setTimeout(() => {
+        btn.classList.remove('copiado');
+        txt.textContent = 'Copiar resumo';
+      }, 2500);
+    }).catch(() => {
+      // Fallback para navegadores sem clipboard API
+      const ta = document.createElement('textarea');
+      ta.value = texto;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      const txt = document.getElementById('btn-copiar-texto');
+      txt.textContent = 'Copiado!';
+      setTimeout(() => { txt.textContent = 'Copiar resumo'; }, 2500);
+    });
   }
 
   carregarJogos();

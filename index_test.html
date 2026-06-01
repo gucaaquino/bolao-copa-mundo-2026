@@ -343,11 +343,14 @@
   /* ─── RENDER DOS GRUPOS ─── */
   function renderGrupos() {
     const container = document.getElementById('jogos-container');
-    const agora     = new Date();
+    const agora = new Date();
     let html = '';
-    let gi   = 0;
+    let gi = 0;
 
-    for (const [grupo, jogos] of Object.entries(gruposData)) {
+    const gruposOrdenados = Object.entries(gruposData)
+        .sort(([a], [b]) => a.localeCompare(b, 'pt-BR'));
+
+    for (const [grupo, jogos] of gruposOrdenados) {
       html += `
         <div class="accordion" id="acc-${gi}">
           <div class="acc-header ${gi===0?'open':''}" onclick="toggleAcc(${gi})">

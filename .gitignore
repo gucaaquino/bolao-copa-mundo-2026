@@ -32,3 +32,5 @@ creds/
 # Logs
 
 *.log
+
+*.ipynb

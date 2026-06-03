@@ -95,7 +95,7 @@ def montar_planilha_usuarios(gc, apostas, SHEET_ID):
         return
 
     usuarios = apostas[['email', 'nome', 'telefone']].drop_duplicates().copy()
-    usuarios['alias'] = usuarios['nome'].apply(lambda x: f'{x.split()[0]} {x.split()[-1]}' if len(x.split()) > 1 else x)
+    usuarios['alias'] = usuarios['nome'].apply(lambda x: f'{x.split()[0].capitalize()} {x.split()[-1].capitalize()}' if len(x.split()) > 1 else x)
 
     preencher_planilha_df(gc, 'usuarios', usuarios, SHEET_ID)
 

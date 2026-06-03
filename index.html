@@ -555,9 +555,13 @@
     btn.innerHTML = '<div class="spinner"></div> Enviando...';
 
     try {
-      const res  = await fetch(APPS_SCRIPT_URL, {
+      const res = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8', 
+        },
         body: JSON.stringify({ nome, email, telefone: tel, palpites }),
+        redirect: 'follow', 
       });
       const data = await res.json();
 
@@ -565,6 +569,14 @@
         btn.disabled = false;
         btn.innerHTML = 'Revisar e enviar';
         document.getElementById('err-prazo').style.display = 'block';
+        return;
+      }
+
+      if (data.status === 'erro') {
+        btn.disabled = false;
+        btn.innerHTML = 'Revisar e enviar';
+        document.getElementById('err-envio').textContent = `Erro: ${data.mensagem}`;
+        document.getElementById('err-envio').style.display = 'block';
         return;
       }
 

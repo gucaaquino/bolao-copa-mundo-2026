@@ -67,6 +67,10 @@
     .state-msg { text-align: center; padding: 3rem 1rem; color: #999; font-size: 14px; }
     .state-msg.erro { color: #c0392b; }
 
+    /* Skeleton loader */
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; height: 52px; margin-bottom: 2px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
     @media(max-width: 700px) {
       .main { padding: 1rem; }
     }
@@ -76,6 +80,7 @@
 
 <div class="main">
 
+  <!-- RANKING -->
   <div class="section active" id="sec-ranking">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
       <div>
@@ -83,7 +88,7 @@
         <p class="page-sub" style="margin-bottom:0;">Classificação geral do bolão</p>
       </div>
       <div style="display:flex; gap:8px;">
-        <a id="btn-ver-palpites" href="#" onclick="irParaPalpites(event)" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
+        <a href="#" onclick="irParaPalpites(event)" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
           👁️ Ver palpites
         </a>
       </div>
@@ -93,10 +98,15 @@
       <button class="btn-refresh" onclick="carregarRanking(true)">Atualizar</button>
     </div>
     <div class="ranking-card" id="ranking-container">
-      <div class="state-msg">Carregando ranking...</div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
     </div>
   </div>
 
+  <!-- PALPITES -->
   <div class="section" id="sec-palpites">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
       <div>
@@ -104,7 +114,7 @@
         <p class="page-sub" style="margin-bottom:0;">Veja o que cada participante apostou</p>
       </div>
       <div style="display:flex; gap:8px;">
-        <a href="#" onclick="irParaRanking(event)" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
+        <a href="#" onclick="irParaRanking(event)" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#185FA5; text-decoration:none; padding:7px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; white-space:nowrap;" onmouseover="this.style.background='#f5f5f3'" onmouseout="this.style.background='#fff'">
           🏆 Ver ranking
         </a>
       </div>
@@ -114,7 +124,9 @@
       <button class="btn-refresh" onclick="carregarPalpites(true)">Atualizar</button>
     </div>
     <div id="palpites-container">
-      <div class="state-msg">Carregando palpites...</div>
+      <div class="skeleton" style="height:64px;margin-bottom:8px;border-radius:12px;"></div>
+      <div class="skeleton" style="height:64px;margin-bottom:8px;border-radius:12px;"></div>
+      <div class="skeleton" style="height:64px;border-radius:12px;"></div>
     </div>
   </div>
 
@@ -122,10 +134,10 @@
 
 <script>
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDjAstNFYTkIcUG0JMSeHnSo9aw1yWui3n6JrTcLNhq5xZFVeOo0x14-GiI3JhEGKTCg/exec';
-  const CACHE_TTL_MS    = 120 * 1000;
-  const CACHE_PAL_MS    = 600 * 1000;
+  const CACHE_TTL_MS  = 120 * 1000;   // 2 min — ranking
+  const CACHE_PAL_MS  = 600 * 1000;   // 10 min — palpites
 
-  let prazoEncerrado = false;
+  // ─── Navegação ───────────────────────────────────────────────────────────────
 
   function showSection(id) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -136,6 +148,8 @@
 
   function irParaPalpites(e) { e.preventDefault(); showSection('palpites'); }
   function irParaRanking(e)  { e.preventDefault(); showSection('ranking');  }
+
+  // ─── LocalStorage cache ──────────────────────────────────────────────────────
 
   function getCache(key) {
     try {
@@ -151,9 +165,35 @@
     try { localStorage.setItem(key, JSON.stringify({ dados, ts: Date.now(), ttl })); } catch(e) {}
   }
 
+  function limparCacheLocal() {
+    ['bolao_ranking', 'bolao_palpites'].forEach(k => localStorage.removeItem(k));
+  }
+
   function tsLabel() {
     return 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
+
+  // ─── Fetch seguro com retry ──────────────────────────────────────────────────
+
+  async function fetchComRetry(url, tentativas = 3, delayMs = 1500) {
+    let ultimoErro;
+    for (let i = 0; i < tentativas; i++) {
+      try {
+        const res = await fetch(url, { redirect: 'follow' });
+        // Apps Script sempre retorna 200; se vier outro status, é erro de infra
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        // Garante que é JSON válido antes de retornar
+        return JSON.parse(text);
+      } catch(err) {
+        ultimoErro = err;
+        if (i < tentativas - 1) await new Promise(r => setTimeout(r, delayMs));
+      }
+    }
+    throw ultimoErro;
+  }
+
+  // ─── Ranking ─────────────────────────────────────────────────────────────────
 
   async function carregarRanking(forcar) {
     const container = document.getElementById('ranking-container');
@@ -164,15 +204,25 @@
       if (cached) { renderRanking(cached); info.textContent = tsLabel(); return; }
     }
 
-    container.innerHTML = '<div class="state-msg">Carregando...</div>';
+    container.innerHTML = `
+      <div class="skeleton"></div><div class="skeleton"></div>
+      <div class="skeleton"></div><div class="skeleton"></div>
+      <div class="skeleton"></div>`;
+
     try {
-      const res  = await fetch(APPS_SCRIPT_URL + '?acao=ranking');
-      const data = await res.json();
+      const data = await fetchComRetry(APPS_SCRIPT_URL + '?acao=ranking');
       setCache('bolao_ranking', data, CACHE_TTL_MS);
       info.textContent = tsLabel();
       renderRanking(data);
     } catch(e) {
-      container.innerHTML = '<div class="state-msg erro">Erro ao carregar. Tente novamente.</div>';
+      // Tenta exibir cache antigo antes de mostrar erro
+      const stale = getCache('bolao_ranking');
+      if (stale) {
+        renderRanking(stale);
+        info.textContent = '⚠️ Dados anteriores (sem conexão)';
+      } else {
+        container.innerHTML = '<div class="state-msg erro">Sem conexão. Tente novamente.</div>';
+      }
     }
   }
 
@@ -183,14 +233,16 @@
       return;
     }
 
-    // ✅ Usa posicao e total já calculados pelo backend
     const lista = [...data.ranking].sort((a, b) => b.total - a.total);
     lista.forEach(item => {
       item._pos    = item.posicao;
       item._empate = lista.filter(x => x.posicao === item.posicao).length > 1;
     });
 
-    let html = `<div class="ranking-header"><div>Pos</div><div>Participante</div><div style="text-align:right">Pontos</div></div>`;
+    let html = `<div class="ranking-header">
+      <div>Pos</div><div>Participante</div><div style="text-align:right">Pontos</div>
+    </div>`;
+
     lista.forEach(item => {
       const topClass = item._pos === 1 ? 'top1' : item._pos === 2 ? 'top2' : item._pos === 3 ? 'top3' : '';
       const posClass = { 1: 'gold', 2: 'silver', 3: 'bronze' }[item._pos] || '';
@@ -201,8 +253,11 @@
         <div class="pts">${Math.round(item.total)}<span>pts</span></div>
       </div>`;
     });
+
     container.innerHTML = html;
   }
+
+  // ─── Palpites ────────────────────────────────────────────────────────────────
 
   async function carregarPalpites(forcar) {
     const container = document.getElementById('palpites-container');
@@ -213,15 +268,24 @@
       if (cached) { renderPalpites(cached); info.textContent = tsLabel(); return; }
     }
 
-    container.innerHTML = '<div class="state-msg">Carregando...</div>';
+    container.innerHTML = `
+      <div class="skeleton" style="height:64px;margin-bottom:8px;border-radius:12px;"></div>
+      <div class="skeleton" style="height:64px;margin-bottom:8px;border-radius:12px;"></div>
+      <div class="skeleton" style="height:64px;border-radius:12px;"></div>`;
+
     try {
-      const res  = await fetch(APPS_SCRIPT_URL + '?acao=palpites');
-      const data = await res.json();
+      const data = await fetchComRetry(APPS_SCRIPT_URL + '?acao=palpites');
       setCache('bolao_palpites', data, CACHE_PAL_MS);
       info.textContent = tsLabel();
       renderPalpites(data);
     } catch(e) {
-      container.innerHTML = '<div class="state-msg erro">Erro ao carregar. Tente novamente.</div>';
+      const stale = getCache('bolao_palpites');
+      if (stale) {
+        renderPalpites(stale);
+        info.textContent = '⚠️ Dados anteriores (sem conexão)';
+      } else {
+        container.innerHTML = '<div class="state-msg erro">Sem conexão. Tente novamente.</div>';
+      }
     }
   }
 
@@ -247,7 +311,9 @@
           <div class="jogo-titulo" onclick="toggleJogo(this)">
             <div>
               <div class="jogo-times">${jogo.time_casa} × ${jogo.time_fora}</div>
-              <div class="jogo-data">${jogo.data} • ${jogo.hora} <span class="pal-count">${palCount} palpite${palCount !== 1 ? 's' : ''}</span></div>
+              <div class="jogo-data">${jogo.data} • ${jogo.hora}
+                <span class="pal-count">${palCount} palpite${palCount !== 1 ? 's' : ''}</span>
+              </div>
             </div>
             <span class="jogo-arrow">▼</span>
           </div>
@@ -269,8 +335,11 @@
 
       html += `</div></div>`;
     }
+
     container.innerHTML = html;
   }
+
+  // ─── Accordion ───────────────────────────────────────────────────────────────
 
   function toggleAcc(header) {
     const body  = header.nextElementSibling;
@@ -289,6 +358,10 @@
     arrow.classList.toggle('open', !open);
   }
 
+  // ─── Init ────────────────────────────────────────────────────────────────────
+
+  // Limpa cache corrompido de versões anteriores ao iniciar
+  limparCacheLocal();
   carregarRanking(false);
 </script>
 </body>

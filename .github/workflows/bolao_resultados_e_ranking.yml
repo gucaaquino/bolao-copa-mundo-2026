@@ -1,6 +1,8 @@
 name: Bolão - Mensagem Resultados e Ranking
 
 on:
+  schedule:
+    - cron: '0 12, 20 * * *'
   workflow_dispatch: 
 
 jobs:

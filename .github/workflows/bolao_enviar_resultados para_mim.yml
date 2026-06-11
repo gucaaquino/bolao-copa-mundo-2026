@@ -1,0 +1,38 @@
+name: Enviar Resultados Para Mim
+
+on:
+  workflow_dispatch: 
+
+jobs:
+  mandar-resultados-ranking:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Mandar Mensagem Resultados
+        env:
+          EVOLUTION_URL:              ${{ secrets.EVOLUTION_URL }}
+          EVOLUTION_APIKEY:           ${{ secrets.EVOLUTION_APIKEY }}
+          EVOLUTION_PHONE_RESULTADOS: ${{ secrets.EVOLUTION_PHONE_AQUINO }}
+          GOOGLE_CREDENTIALS:         ${{ secrets.GOOGLE_CREDENTIALS }}
+          SHEET_ID:                   ${{ secrets.SHEET_ID }}
+        run: python -m scripts.send_messages.send_resultados
+
+      - name: Mandar Mensagem Ranking
+        env:
+          EVOLUTION_URL:           ${{ secrets.EVOLUTION_URL }}
+          EVOLUTION_APIKEY:        ${{ secrets.EVOLUTION_APIKEY }}
+          EVOLUTION_PHONE_RANKING: ${{ secrets.EVOLUTION_PHONE_AQUINO }}
+          GOOGLE_CREDENTIALS:      ${{ secrets.GOOGLE_CREDENTIALS }}
+          SHEET_ID:                ${{ secrets.SHEET_ID }}
+        run: python -m scripts.send_messages.send_ranking

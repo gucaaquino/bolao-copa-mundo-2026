@@ -15,7 +15,7 @@ def api_request(url, API_TOKEN, COMPETITION):
 def buscar_jogos_api(rodadas_filter, API_TOKEN, COMPETITION):
     r = api_request('matches', API_TOKEN, COMPETITION)
     
-    jogos = [p for p in r.json()['matches'] if p['matchday'] in rodadas_filter]
+    jogos = [p for p in r.json()['matches'] if p['id'] in rodadas_filter]
     print(f"⚽ {len(jogos)} jogos encontrados")
 
     return jogos

@@ -71,8 +71,12 @@ def montar_planilha_resultados(gc, jogos, SHEET_ID):
     for p in jogos:
         id       = p.get('id')
         status   = traduzir_status(p.get('status'))
-        gol_casa = p['score']['fullTime']['home']
-        gol_fora = p['score']['fullTime']['away']
+        if p['score']['duration'] == 'REGULAR':
+            gol_casa = p['score']['fullTime']['home']
+            gol_fora = p['score']['fullTime']['away']
+        else:
+            gol_casa = p['score']['regularTime']['home']
+            gol_fora = p['score']['regularTime']['away']
 
         dados.append([id, status, str(gol_casa) if gol_casa is not None else '', str(gol_fora) if gol_fora is not None else ''])
 
